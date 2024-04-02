@@ -466,8 +466,8 @@ def brute_reverse(res, ip_list, verbose=False, thread_num=None):
 
 def brute_domain(
     res,
-    dictfile,
     dom,
+    dictfile='../subdomain_enum/subbrute/names.txt',
     filter_=None,
     verbose=False,
     ignore_wildcard=False,
@@ -998,10 +998,7 @@ def general_enum(
     res,
     domain,
     do_axfr,
-    do_bing,
     do_yandex,
-    do_spf,
-    do_whois,
     do_crt,
     zw,
     request_timeout,
@@ -1013,9 +1010,6 @@ def general_enum(
     if not successful, it will try individual record type enumeration.
     """
     returned_records = []
-
-    # Var for SPF Record Range Reverse Look-up
-    found_spf_ranges = []
 
     # Var to hold the IP Addresses that will be queried in Whois
     ip_for_whois = []
@@ -1164,18 +1158,6 @@ def general_enum(
                 text_data += t[2]
                 returned_records.extend([{'domain': domain, 'type': t[0], 'name': t[1], 'strings': t[2]}])
 
-        # Process SPF records if selected
-        if do_spf and len(text_data) > 0:
-            print_status('Expanding IP ranges found in DNS and TXT records for Reverse Look-up')
-            processed_spf_data = process_spf_data(res, text_data)
-            if processed_spf_data is not None:
-                found_spf_ranges.extend(processed_spf_data)
-            if len(found_spf_ranges) > 0:
-                print_status('Performing Reverse Look-up of SPF Ranges')
-                returned_records.extend(brute_reverse(res, unique(found_spf_ranges)))
-            else:
-                print_status('No IP Ranges were found in SPF and TXT Records')
-
         # Enumerate SRV Records for the targeted Domain
         print_status('Enumerating SRV Records')
         srv_rcd = brute_srv(res, domain, thread_num=thread_num)
@@ -1195,16 +1177,6 @@ def general_enum(
                     ]
                 )
 
-        # Do Bing Search enumeration if selected
-        if do_bing:
-            print_status('Performing Bing Search Enumeration')
-            bing_rcd = se_result_process(res, scrape_bing(domain))
-            if bing_rcd:
-                for r in bing_rcd:
-                    if 'address' in bing_rcd:
-                        ip_for_whois.append(r['address'])
-                returned_records.extend(bing_rcd)
-
         # Do Yandex Search enumeration if selected
         if do_yandex:
             print_status('Performing Yandex Search Enumeration')
@@ -1223,12 +1195,6 @@ def general_enum(
                     if 'address' in crt_rcd:
                         ip_for_whois.append(r['address'])
                 returned_records.extend(crt_rcd)
-
-        if do_whois:
-            whois_rcd = whois_ips(res, ip_for_whois)
-            if whois_rcd:
-                for r in whois_rcd:
-                    returned_records.extend(r)
 
         if zw:
             zone_info = ds_zone_walk(res, domain, request_timeout)
@@ -1498,7 +1464,7 @@ def ds_zone_walk(res, domain, lifetime):
     return records
 
 
-def dnsrecon(domain, types, type_map, res, request_timeout, do_output, rvl_ip_list, dictionary, ns_server, scan_info, xfr, bing, yandex, spf_enum, do_whois, do_crt, zonewalk, verbose, wildcard_filter, ignore_wildcardrr, output_file, results_db, json_file, csv_file, thread_num):
+def dnsrecon(domain, types, type_map, res, request_timeout, do_output, xfr, yandex, do_crt, zonewalk, thread_num):
     #
     # Option Variables
     #
@@ -1519,24 +1485,13 @@ def dnsrecon(domain, types, type_map, res, request_timeout, do_output, rvl_ip_li
 
         try:
             # here we start checking for the different types
-            if type_ == 'axfr':
-                zonercds = res.zone_transfer()
-                if not zonercds:
-                    error(f'{type_}: No records were returned.')
-                    continue
-
-                returned_records.extend(zonercds)
-
-            elif type_ == 'std':
+            if type_ == 'std':
                 print_status(f'{type_}: Performing General Enumeration against: {domain}...')
                 std_enum_records = general_enum(
                     res,
                     domain,
                     xfr,
-                    bing,
                     yandex,
-                    spf_enum,
-                    do_whois,
                     do_crt,
                     zonewalk,
                     request_timeout,
@@ -1544,75 +1499,6 @@ def dnsrecon(domain, types, type_map, res, request_timeout, do_output, rvl_ip_li
                 )
                 if do_output and std_enum_records:
                     returned_records.extend(std_enum_records)
-
-            elif type_ == 'rvl':
-                if not rvl_ip_list:
-                    error(f'{type_}: Invalid Address/CIDR or Address Range provided.')
-                    continue
-
-                rvl_enum_records = brute_reverse(res, rvl_ip_list, verbose, thread_num=thread_num)
-                if do_output:
-                    returned_records.extend(rvl_enum_records)
-
-            elif type_ == 'brt':
-                # here we are ready to perform the bruteforce
-                print_status(f'{type_}: Performing host and subdomain brute force against {domain}...')
-                brt_enum_records = brute_domain(
-                    res,
-                    dictionary,
-                    domain,
-                    wildcard_filter,
-                    verbose,
-                    ignore_wildcardrr,
-                    thread_num=thread_num,
-                )
-                if do_output and brt_enum_records:
-                    returned_records.extend(brt_enum_records)
-
-            elif type_ == 'srv':
-                print_status(f'{type_}: Enumerating Common SRV Records against {domain}...')
-                srv_enum_records = brute_srv(res, domain, verbose, thread_num=thread_num)
-                if do_output:
-                    returned_records.extend(srv_enum_records)
-
-            elif type_ == 'tld':
-                print_status(f'{type_}: Performing TLD Brute force Enumeration against {domain}...')
-                tld_enum_records = brute_tlds(res, domain, verbose, thread_num=thread_num)
-                if do_output:
-                    returned_records.extend(tld_enum_records)
-
-            elif type_ == 'bing':
-                print_status(f'{type_}: Performing Bing Search Enumeration against {domain}...')
-                bing_enum_records = se_result_process(res, scrape_bing(domain))
-                if do_output:
-                    returned_records.extend(bing_enum_records)
-
-            elif type_ == 'yand':
-                print_status(f'{type_}: Performing Yandex Search Enumeration against {domain}...')
-                yandex_enum_records = se_result_process(res, scrape_yandex(domain))
-                if do_output:
-                    returned_records.extend(yandex_enum_records)
-
-            elif type_ == 'crt':
-                print_status(f'{type_}: Performing Crt.sh Search Enumeration against {domain}...')
-                crt_enum_records = se_result_process(res, scrape_crtsh(domain))
-                if do_output:
-                    returned_records.extend(crt_enum_records)
-
-            elif type_ == 'snoop':
-                if not (dictionary and ns_server):
-                    error(f'{type_}: A dictionary file and at least one Name Server have to be specified!')
-                    continue
-
-                print_status(f'{type_}: Performing Cache Snooping against NS Server: {ns_server[0]}...')
-                cache_enum_records = in_cache(res, dictionary, ns_server[0])
-                if do_output:
-                    returned_records.extend(cache_enum_records)
-
-            elif type_ == 'zonewalk':
-                zonewalk_result = ds_zone_walk(res, domain, request_timeout)
-                if do_output:
-                    returned_records.extend(zonewalk_result)
 
             else:
                 error(f'{type_}: This type of scan is not in the list.')
@@ -1627,30 +1513,5 @@ Please make sure you can reach the target DNS Servers directly and requests are 
 Increase the timeout from {request_timeout} seconds to a higher number with --lifetime <time> option."""
             )
             
-
-    # if the program has not exited,
-    # we can check if output is needed
-
-    # if an output xml file is specified, it will write returned results.
-    if output_file:
-        print_status(f'Saving records to XML file: {output_file}')
-        xml_enum_doc = dns_record_from_dict(returned_records, scan_info, domain)
-        write_to_file(xml_enum_doc, output_file)
-
-    # if an output db file is specified, it will write returned results.
-    if results_db:
-        print_status(f'Saving records to SQLite3 file: {results_db}')
-        create_db(results_db)
-        write_db(results_db, returned_records)
-
-    # if an output csv file is specified, it will write returned results.
-    if csv_file:
-        print_status(f'Saving records to CSV file: {csv_file}')
-        write_to_file(make_csv(returned_records), csv_file)
-
-    # if an output json file is specified, it will write returned results.
-    if json_file:
-        print_status(f'Saving records to JSON file: {json_file}')
-        write_json(json_file, returned_records, scan_info)
 
     return returned_records

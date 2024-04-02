@@ -14,13 +14,60 @@
 #    Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
 
 
-from urllib.error import HTTPError, URLError
-from urllib.request import Request, urlopen
+# from urllib.error import HTTPError, URLError
+# from urllib.request import Request, urlopen
 
+# from lxml import etree
+
+# from dnsrecon.lib.msf_print import *
+
+
+# def scrape_crtsh(dom):
+#     """
+#     Function for enumerating subdomains by scraping crt.sh.
+#     """
+#     results = []
+#     headers = {'User-Agent': 'Mozilla/5.0 (X11; Linux x86_64; rv:31.0) Gecko/20100101 Firefox/31.0'}
+#     url = f'https://crt.sh/?q=%25.{dom}'
+
+#     req = Request(url=url, headers=headers)
+#     try:
+#         resp = urlopen(req, timeout=30)
+#         data = resp.read()
+#     except HTTPError as e:
+#         print_error(f'Bad http status from crt.sh: "{e.code}"')
+#         return results
+#     except URLError as e:
+#         print_error(f'Connection with crt.sh failed. Reason: "{e.reason}"')
+#         return results
+
+#     root = etree.HTML(data)
+#     tbl = root.xpath('//table/tr/td/table/tr/td[5]')
+#     if len(tbl) < 1:
+#         print_error('Certificates for subdomains not found')
+#         return results
+
+#     for ent in tbl:
+#         sub_dom = ent.text
+#         if not sub_dom.endswith('.' + dom):
+#             continue
+#         if sub_dom.startswith('*.'):
+#             print_status(f'\t {sub_dom} wildcard')
+#             continue
+#         if sub_dom not in results:
+#             results.append(sub_dom)
+
+#     return results
+
+
+import requests
 from lxml import etree
 
-from .msf_print import *
+def print_error(message):
+    print(f"Error: {message}")
 
+def print_status(message):
+    print(f"Status: {message}")
 
 def scrape_crtsh(dom):
     """
@@ -30,21 +77,21 @@ def scrape_crtsh(dom):
     headers = {'User-Agent': 'Mozilla/5.0 (X11; Linux x86_64; rv:31.0) Gecko/20100101 Firefox/31.0'}
     url = f'https://crt.sh/?q=%25.{dom}'
 
-    req = Request(url=url, headers=headers)
     try:
-        resp = urlopen(req, timeout=30)
-        data = resp.read()
-    except HTTPError as e:
-        error(f'Bad http status from crt.sh: "{e.code}"')
+        response = requests.get(url, headers=headers, timeout=30)
+        response.raise_for_status()  # This will raise an HTTPError for bad responses
+        data = response.content
+    except requests.exceptions.HTTPError as e:
+        print_error(f'Bad HTTP status from crt.sh: "{e.response.status_code}"')
         return results
-    except URLError as e:
-        error(f'Connection with crt.sh failed. Reason: "{e.reason}"')
+    except requests.exceptions.RequestException as e:
+        print_error(f'Connection with crt.sh failed. Reason: "{e}"')
         return results
 
     root = etree.HTML(data)
     tbl = root.xpath('//table/tr/td/table/tr/td[5]')
     if len(tbl) < 1:
-        error('Certificates for subdomains not found')
+        print_error('Certificates for subdomains not found')
         return results
 
     for ent in tbl:

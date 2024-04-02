@@ -82,63 +82,59 @@ def process_range(arg):
 # Define Args
 def parse_args():
     # parse the args
-
-    # sublist3r args
     parser = argparse.ArgumentParser(epilog='\tExample: \r\npython ' + sys.argv[0] + " -d google.com")
     parser.error = parser_error
     parser._optionals.title = "OPTIONS"
-    parser.add_argument('-d', '--domain', help="Target Domain", required=True)
-    parser.add_argument('-b', '--bruteforce', help='Enable the subbrute bruteforce module', nargs='?', default=False)
-    parser.add_argument('-v', '--verbose', help='Enable Verbosity and display results in realtime', nargs='?', default=False)
-    parser.add_argument('-t', '--threads', help='Number of threads to use for subbrute bruteforce', type=int, default=30)
-    parser.add_argument('-o', '--output', help='Save the results to text file')
+
+    # sublist3r args
+    parser.add_argument(
+            '-d', '--domain', 
+            help="Target Domain", 
+            required=True)
+    parser.add_argument(
+            '-b', '--bruteforce', 
+            help='Enable the subbrute bruteforce module', 
+            default=False)
+    parser.add_argument(
+            '-v', '--verbose', 
+            help='Enable Verbosity and display results in realtime', 
+            nargs='?', 
+            default=False)
+    parser.add_argument(
+            '-t', '--threads', 
+            help='Number of threads to use for subbrute bruteforce', 
+            type=int, 
+            default=30)
+    parser.add_argument(
+            '-o', '--output', 
+            help='Save the results to text file')
 
     # dnsrecon args
     parser.add_argument(
-            '-n',
-            '--name_server',
+            '-n', '--name_server',
             type=str,
             dest='ns_server',
             help='Domain server to use. If none is given, the SOA of the target will be used. Multiple servers can be specified using a comma separated list.',
         )
     parser.add_argument(
-            '-r',
-            '--range',
-            type=str,
-            dest='range',
-            help='IP range for reverse lookup brute force in formats   (first-last) or in (range/bitmask).',
-        )
+            '-a', 
+            help='If enabled, do not perform AXFR with standard enumeration.', 
+            action='store_true', 
+            default=False)
     parser.add_argument(
-            '-D',
-            '--dictionary',
-            type=str,
-            dest='dictionary',
-            help='Dictionary file of subdomain and hostnames to use for brute force.',
-        )
-    parser.add_argument(
-            '-f',
-            help='Filter out of brute force domain lookup, records that resolve to the wildcard defined IP address when saving records.',
+            '-y',
+            help='If enabled, do not perform Yandex enumeration with standard enumeration.',
             action='store_true',
-        )
-    parser.add_argument('-a', help='Perform AXFR with standard enumeration.', action='store_true')
-    parser.add_argument(
-            '-s',
-            help='Perform a reverse lookup of IPv4 ranges in the SPF record with standard enumeration.',
-            action='store_true',
+            default=False
         )
     parser.add_argument(
             '-k',
-            help='Perform crt.sh enumeration with standard enumeration.',
-            action='store_true',
-        )
-    parser.add_argument(
-            '-w',
-            help='Perform deep whois record analysis and reverse lookup of IP ranges found through Whois when doing a standard enumeration.',
+            help='If enabled, do not perform crt.sh enumeration with standard enumeration.',
             action='store_true',
         )
     parser.add_argument(
             '-z',
-            help='Performs a DNSSEC zone walk with standard enumeration.',
+            help='If enabled, does not perform a DNSSEC zone walk with standard enumeration.',
             action='store_true',
         )
     parser.add_argument(
@@ -154,21 +150,6 @@ def parse_args():
             help='Use TCP protocol to make queries.',
             action='store_true',
         )
-    parser.add_argument('--db', type=str, dest='db', help='SQLite 3 file to save found records.')
-    parser.add_argument('-x', '--xml', type=str, dest='xml', help='XML file to save found records.')
-    parser.add_argument(
-            '-c',
-            '--csv',
-            type=str,
-            dest='csv',
-            help='Save output to a comma separated value file.',
-        )
-    parser.add_argument('-j', '--json', type=str, dest='json', help='save output to a JSON file.')
-    parser.add_argument(
-            '--iw',
-            help='Continue brute forcing a domain even if a wildcard record is discovered.',
-            action='store_true',
-        )
     parser.add_argument(
             '--disable_check_recursion',
             help='Disables check for recursion on name servers',
@@ -179,26 +160,7 @@ def parse_args():
             help='Disables check for BIND version on name servers',
             action='store_true',
         )
-    parser.add_argument(
-                '--type',
-                type=str,
-                dest='type',
-                help="""Type of enumeration to perform.
-    Possible types:
-        std:      SOA, NS, A, AAAA, MX and SRV.
-        rvl:      Reverse lookup of a given CIDR or IP range.
-        brt:      Brute force domains and hosts using a given dictionary.
-        srv:      SRV records.
-        axfr:     Test all NS servers for a zone transfer.
-        bing:     Perform Bing search for subdomains and hosts.
-        yand:     Perform Yandex search for subdomains and hosts.
-        crt:      Perform crt.sh search for subdomains and hosts.
-        snoop:    Perform cache snooping against all NS servers for a given domain, testing
-                all with file containing the domains, file given with -D option.
 
-        tld:      Remove the TLD of given domain and test against all TLDs registered in IANA.
-        zonewalk: Perform a DNSSEC zone walk using NSEC records.""",
-        )
     return parser.parse_args()
 
 def parser_error(errmsg):
@@ -221,74 +183,15 @@ def main():
     # a "map" that specifies if a type of scan needs
     # the domain and the dictionary
     type_map = {
-        'axfr': {'domain': True, 'dictionary': False},
         'std': {'domain': True, 'dictionary': False},
-        'srv': {'domain': True, 'dictionary': False},
-        'tld': {'domain': True, 'dictionary': False},
-        'bing': {'domain': True, 'dictionary': False},
-        'yand': {'domain': True, 'dictionary': False},
-        'crt': {'domain': True, 'dictionary': False},
-        'rvl': {'domain': False, 'dictionary': False},
-        'zonewalk': {'domain': True, 'dictionary': False},
-        'brt': {'domain': True, 'dictionary': True},
-        'snoop': {'domain': False, 'dictionary': True},
+        'brt': {'domain': True, 'dictionary': False},
     }
-    valid_types = type_map.keys()
-
-    #
-    # Parse options
-    #
-
-
-    # validating type param which is in the form: type1,type2,...,typeN
-    # if the pattern is not correct or if there is an unknown type we exit
-    type_arg = args.type
-    types = []
-    if type_arg:
-        type_arg = type_arg.lower().strip()
-
-        # we create a dynamic regex specifying min and max type length
-        # and max number of possible scan types
-        min_type_len = len(min(valid_types, key=len))
-        max_type_len = len(max(valid_types, key=len))
-        type_len = len(valid_types)
-        dynamic_regex = f'^([a-z]{{{min_type_len},{max_type_len}}},?){{,{type_len}}}$'
-
-        type_match = re.match(dynamic_regex, type_arg)
-        if not type_match:
-            parser_error('This type of scan is not valid')
-
-        incorrect_types = [t for t in type_arg.split(',') if t not in valid_types]
-        if incorrect_types:
-            incorrect_types_str = ','.join(incorrect_types)
-            parser_error(f'This type of scan is not in the list: {incorrect_types_str}')
-             
-
-        types = list(set(type_arg.split(',')))
-
-    # validating range
-    rvl_ip_list = []
-    if args.range:
-        rvl_ip_list = process_range(args.range)
-        # if the provided range is not valid, we exit
-        if not rvl_ip_list:
-            parser_error('Invalid Address/CIDR or Address Range provided.')
-             
-
-        # otherwise, we update a type list
-        if 'rvl' not in types:
-            types.append('rvl')
-         
 
     # here domain can be assigned. If it is not required
     # domain will be None
     domain = args.domain
 
-    # if we don't have any types, but we have a domain
-    # we will perform a general DNS enumeration (type: std),
-    # so we add it to the types!
-    if not types and domain:
-        types = ['std']
+    types = ['std']
 
     # validate user provided name server(s)
     ns_server = []
@@ -320,86 +223,47 @@ def main():
         # remove duplicated
         ns_server = list(set(ns_server))
 
-    # validating dictionary parameter
-    dictionary_required = []
-    if types:
-        # combining the types and the type_map, we obtain
-        # dictionary_required, which is a list of bool
-        # where True means that a dictionary file is required
-        dictionary_required = [type_map[t]['dictionary'] for t in types]
-
-    dictionary = ''
-    if any(dictionary_required):
-        # we generate a list of possible dictionary files
-        script_dir = os.path.dirname(os.path.realpath(__file__)) + os.sep
-        dictionaries = ['/etc/dnsrecon/namelist.txt', script_dir + 'namelist.txt']
-
-        # if the user has provided a custom dictionary file,
-        # we insert it as the first entry of the list
-        if args.dictionary:
-            args.dictionary = args.dictionary.strip()
-            dictionaries.insert(0, args.dictionary)
-        else:
-            print('No dictionary file has been specified.')
-
-        # we individuate the first valid dictionary file,
-        # among those in the list
-        for dict_ in dictionaries:
-            if os.path.isfile(dict_):
-                dictionary = dict_
-                break
-
-        # if we don't have a valid dictionary file, we exit
-        if not dictionary:
-            parser_error('No valid dictionary files have been specified or found within the tool')
-             
-
-        dict_type = 'user' if args.dictionary == dictionary else 'tool'
-        print(f'Using the dictionary file: {dictionary} (provided by {dict_type})')
-
     request_timeout = float(args.lifetime)
 
-    output_file = args.xml
-    results_db = args.db
-    csv_file = args.csv
-    json_file = args.json
 
     # this flag summarizes if the program has to output
-    do_output = bool(output_file or results_db or csv_file or json_file)
+    # do_output = bool(output_file or results_db or csv_file or json_file)
+    do_output = True
 
     verbose = args.verbose
-    ignore_wildcardrr = args.iw
     CONFIG['disable_check_recursion'] = args.disable_check_recursion
     CONFIG['disable_check_bindversion'] = args.disable_check_bindversion
 
-    xfr = args.a
-    bing = False
-    yandex = False
-    do_crt = args.k
-    do_whois = args.w
-    zonewalk = args.z
-    spf_enum = args.s 
-    wildcard_filter = args.f
+    xfr = True
+    yandex = True
+    do_crt = True   
+    zonewalk = True
+
+    if args.a:
+        xfr = False
+    if args.y:
+        yandex = False
+    if args.k:
+        do_crt = False
+    if args.z:
+        zonewalk = False
+
     proto = 'tcp' if args.tcp else 'udp'
 
     # Set the resolver
     res = DnsHelper(domain, ns_server, request_timeout, proto)
 
-    scan_info = [' '.join(sys.argv), str(datetime.datetime.now())]
-
-
 
     banner()
 
 
-
     # Sublist3r
 
-    # print(B + "Running Sublist3r ")
-    # subdomains = sublist3r(domain, threads, savefile, silent=False, verbose=verbose, enable_bruteforce=enable_bruteforce)
-    # print(subdomains)
+    print(B + "Running Sublist3r ")
+    subdomains = sublist3r(domain, threads, savefile, silent=False, verbose=verbose, enable_bruteforce=enable_bruteforce)
+    print(subdomains)
 
     # dnsrecon
+
     print(B + "Running dnsrecon ")
-    smth = dnsrecon(domain, types, type_map, res, request_timeout, do_output, rvl_ip_list, dictionary, ns_server, scan_info, xfr, bing, yandex, spf_enum, do_whois, do_crt, zonewalk, verbose, wildcard_filter, ignore_wildcardrr, output_file, results_db, json_file, csv_file, threads)
-    print(smth)
+    smth = dnsrecon(domain, types, type_map, res, request_timeout, do_output, xfr, yandex, do_crt, zonewalk, threads)
