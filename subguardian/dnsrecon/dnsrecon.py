@@ -1471,6 +1471,8 @@ def dnsrecon(domain, types, type_map, res, request_timeout, do_output, xfr, yand
 
     returned_records = []
 
+    xfr = []
+
     # By default, thread_num will be None
     # If None number of workers are default number of processors on machine * 5 with version 3.5-3.7
     # If using version 3.8+ will be min(32, os.cpu_count() + 4)
