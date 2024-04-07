@@ -287,13 +287,20 @@ def main():
     # Jeetcreates.com
     records = {'A': [{'address': '185.230.63.171', 'name': 'jeetcreates.com', 'type': 'A'}, {'address': '185.230.63.171', 'domain': 'jeetcreates.com', 'name': 'jeetcreates.com', 'type': 'A'}, {'address': '185.230.63.107', 'name': 'jeetcreates.com', 'type': 'A'}, {'address': '185.230.63.186', 'domain': 'jeetcreates.com', 'name': 'jeetcreates.com', 'type': 'A'}, {'address': '185.230.63.107', 'domain': 'jeetcreates.com', 'name': 'jeetcreates.com', 'type': 'A'}, {'address': '185.230.63.186', 'name': 'jeetcreates.com', 'type': 'A'}], 'NS': [{'Version': '', 'address': '216.239.38.100', 'domain': 'jeetcreates.com', 'recursive': 'True', 'target': 'ns3.wixdns.net', 'type': 'NS'}, {'Version': '', 'address': '216.239.36.100', 'domain': 'jeetcreates.com', 'recursive': 'True', 'target': 'ns2.wixdns.net', 'type': 'NS'}], 'SOA': [{'address': '216.239.36.100', 'domain': 'jeetcreates.com', 'mname': 'ns2.wixdns.net', 'type': 'SOA'}], 'sublist3r': [{'name': 'www.jeetcreates.com', 'type': 'subdomain'}]}
 
+    # Check CNAME vulnearbilities (REVISIT CHECK THOROUGHLY)
+    vulnerable_subdomains = []
 
-    print(records['CNAME'])
-    # Check CNAME vulnearbilities
+    if 'CNAME' in records:
+        vulnerable_subdomains.extend(cname_check(records['CNAME']))
+    
+    if 'sublist3r' in records:
+        vulnerable_subdomains.extend(cname_check(records['CNAME']))
+
+    # Check A name vulnerabilities
+
+    if 'A' in records:
+        vulnerable_subdomains.extend(aname_check(records['A']))
 
 
-    # print(type(records['sublist3r']))
-
-    # print(cname_check(records['sublist3r']))
 
 

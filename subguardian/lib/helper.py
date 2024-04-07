@@ -1,7 +1,6 @@
 from collections import defaultdict
 
 
-
 def sort_records(records):
 
     records_by_type = defaultdict(list)
