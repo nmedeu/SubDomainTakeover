@@ -2,6 +2,14 @@ import dns.resolver
 import requests
 from bs4 import BeautifulSoup
 import re
+import json
+
+try: 
+    with open('fingerprints.json', 'r') as f:
+        service_fingerprints = json.load(f)
+        print("JSON loaded successfully. Number of services loaded:", len(service_fingerprints))
+except Exception as e:
+     print(f"Failed to load JSON: {e}")
 
 def check_cname(subdomain):
     """Resolve the CNAME for a given subdomain."""
@@ -14,7 +22,6 @@ def check_cname(subdomain):
         print(f"No CNAME record found for {subdomain}.")
         return None
     except Exception as e:
-        print('lol')
         print(f"An error occurred: {e}")
         return None
 
@@ -103,33 +110,62 @@ known_external_services = [
 ]
 
 def check_cname_for_external_services(subdomain):
-    """Check if the CNAME for a given subdomain points to an external service."""
+    """Check if the CNAME for a given subdomain points to an external service and checks the HTTP response for the fingerprint."""
     try:
-        # Resolve the CNAME record for the subdomain
         answers = dns.resolver.resolve(subdomain, 'CNAME')
+        print(f"CNAME records found for {subdomain}: {[str(rdata.target) for rdata in answers]}")
         for rdata in answers:
             cname_target = str(rdata.target).lower()
-            print(f"{subdomain} is an alias for {cname_target}")
-            
+            print(f"Checking {subdomain} alias {cname_target} against known services...")
+            print("Alright jeet we begin debugging here")
             # Check if the CNAME points to any known external service
-            for pattern in known_external_services:
-                # Convert wildcard pattern to regex pattern
-                regex_pattern = pattern.replace('.', r'\.').replace('*', r'.*')
-                if re.match(regex_pattern, cname_target):
-                    print(f"Potential vulnerability found: {subdomain} points to known external service {cname_target}")
-                    return True
+            for service in service_fingerprints:
+                for pattern in service['cname']:
+                    print("Currently checking pattern: "+ pattern)
+                    regex_pattern = pattern.replace('.', r'\.').replace('*', r'.*')
+                    if re.search(regex_pattern, cname_target):
+                        print(f"Matching service found: {service['service']}")
+                        fingerprint_match = check_for_fingerprint(subdomain, service['fingerprint'])
+                        print(f"Fingerprint check for {subdomain} on {service['service']}: {fingerprint_match}")
+                        if fingerprint_match:
+                            print(f"Potential vulnerability found: {subdomain} points to {service['service']} with matching fingerprint.")
+                            return True
+                        else:
+                            print(f"Fingerprint does not match for {service['service']}.")
     except dns.resolver.NoAnswer:
-        # No CNAME record found
         print(f"No CNAME record found for {subdomain}.")
     except dns.resolver.NXDOMAIN:
-        # Subdomain itself does not exist
         print(f"{subdomain} does not exist.")
     except Exception as e:
-        print(f"An error occurred: {e}")
+        print(f"An error occurred during CNAME resolution: {e}")
+    return False
+
+def check_for_fingerprint(subdomain, fingerprint):
+    print("JEET U MADE IT")
+    """Check the HTTP response of the subdomain for the given fingerprint."""
+    try:
+        response = requests.get(f"http://{subdomain}", timeout=5)
+        print(f"HTTP Status for {subdomain}: {response.status_code}")
+        content = response.text[:1000]  # Print the first 1000 characters of the response for debugging
+        print(f"Snippet of webpage content for {subdomain}: {content}")
+        
+        # Simple string check (case-insensitive)
+        if fingerprint.lower() in response.text.lower():
+            print("Simple string match found.")
+            return True
+        
+        # For more complex patterns, consider using regular expressions.
+        # If you go this route, make sure your fingerprints in the JSON are valid regex patterns.
+        # if re.search(fingerprint, response.text, re.IGNORECASE):
+        #     print("Regex match found.")
+        #     return True
+
+    except requests.RequestException as e:
+        print(f"Failed to fetch the webpage for {subdomain}: {e}")
     return False
 
 
-subdomain = 'jeetcreates.com'
+subdomain = 'blog.bucrib.com'
 check_cname_for_external_services(subdomain)
 
 
