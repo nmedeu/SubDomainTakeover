@@ -1,5 +1,5 @@
 argparse
-dnspython
 requests
-netaddr
 lxml
+netaddr==1.2.1
+dnspython==2.6.1
