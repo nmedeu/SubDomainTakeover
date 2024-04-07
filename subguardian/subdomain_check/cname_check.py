@@ -115,6 +115,9 @@ def check_cname_for_external_services(subdomain):
         answers = dns.resolver.resolve(subdomain, 'CNAME')
         print(f"CNAME records found for {subdomain}: {[str(rdata.target) for rdata in answers]}")
         for rdata in answers:
+            print("PRINTING RDATA")
+            print(rdata)
+            print("RDATAPRINTEND")
             cname_target = str(rdata.target).lower()
             print(f"Checking {subdomain} alias {cname_target} against known services...")
             print("Alright jeet we begin debugging here")

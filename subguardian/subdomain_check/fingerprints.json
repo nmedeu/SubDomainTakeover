@@ -928,5 +928,10 @@
     "service": "Zendesk",
     "status": "Not vulnerable",
     "vulnerable": false
+  },
+  {
+    "service": "GitHub Pages",
+    "cname": ["*.github.io"],
+    "fingerprint": "There isn't a GitHub Pages site here."
   }
 ]
