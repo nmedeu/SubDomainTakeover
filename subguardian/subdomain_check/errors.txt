@@ -1,0 +1,35 @@
+404 Not Found
+Error 404
+Page Not Found
+This site can’t be reached
+server IP address could not be found
+403 Forbidden
+Access Denied 
+404
+Service Unavailable
+Under Construction
+Domain Not Linked
+Website Coming Soon
+No Such Bucket
+Bucket Not Found
+Repository not found
+Project doesn't exist
+Application Error
+An error occurred
+Not Found on Accelerator
+Temporary Error
+DNS_PROBE_FINISHED_NXDOMAIN
+Connection timed out
+Site Not Published
+The requested URL was not found on this server
+This webpage is not available
+Webpage not available
+The site is temporarily unavailable
+Server not found
+Failed to open page
+We can’t connect to the server
+Page does not exist
+Nothing here yet
+This page is parked
+Account Suspended
+Account Inactive
