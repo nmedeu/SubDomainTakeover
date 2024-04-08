@@ -297,9 +297,10 @@ def main():
 
 
     # Check NS vulnerabilities
+    # print("NS records are: ", records['NS'])
+    # print(ns_check(records['NS']))
 
-    # print(records['sublist3r'][0]['name'])
-    print("NS records are: ", records['NS'])
-    print(ns_check(records['NS']))
 
+    # Check MX vulnerabilities
+    print("MX records are: ", records['MX'])
 
