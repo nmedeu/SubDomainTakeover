@@ -1,5 +1,6 @@
 argparse
-dnspython
 requests
-netaddr
+netaddr==1.2.1
+dnspython==2.6.1
 lxml
+python-whois==0.9.3

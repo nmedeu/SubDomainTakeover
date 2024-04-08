@@ -40,7 +40,7 @@ def check_http_response(subdomain):
     except Exception as e:
         print(f"An error occurred: {e}")
 
-    return False
+    return 
 
 
 def cname_check(cnames):
