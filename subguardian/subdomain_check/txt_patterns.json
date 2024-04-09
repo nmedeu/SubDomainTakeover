@@ -1,0 +1,84 @@
+
+
+{
+    "AWS S3 Bucket": [
+        ".*s3-website[.-].*\\.amazonaws\\.com.*",
+        ".*s3\\.amazonaws\\.com.*"
+    ],
+    "Azure Blob": [
+        ".*blob\\.core\\.windows\\.net.*"
+    ],
+    "Heroku": [
+        ".*herokudns\\.com.*",
+        ".*herokuapp\\.com.*"
+    ],
+    "Google Cloud Storage": [
+        ".*storage\\.googleapis\\.com.*"
+    ],
+    "GitHub Pages": [
+        ".*github\\.io.*"
+    ],
+    "Shopify": [
+        ".*myshopify\\.com.*"
+    ],
+    "Ghost": [
+        ".*ghost\\.io.*"
+    ],
+    "WordPress": [
+        ".*wordpress\\.com.*"
+    ],
+    "Squarespace": [
+        ".*squarespace\\.com.*"
+    ],
+    "Wix": [
+        ".*wixsite\\.com.*"
+    ],
+    "Pantheon": [
+        ".*pantheonsite\\.io.*"
+    ],
+    "Tumbler": [
+        ".*tumblr\\.com.*"
+    ],
+    "Cargo Collective": [
+        ".*cargocollective\\.com.*"
+    ],
+    "Bitbucket": [
+        ".*bitbucket\\.io.*"
+    ],
+    "Unbounce Pages": [
+        ".*unbouncepages\\.com.*"
+    ],
+    "Desk": [
+        ".*desk\\.com.*"
+    ],
+    "Zendesk": [
+        ".*zendesk\\.com.*"
+    ],
+    "Fastly": [
+        ".*fastly\\.net.*"
+    ],
+    "Help Juice": [
+        ".*helpjuice\\.com.*"
+    ],
+    "Help Scout": [
+        ".*helpscoutdocs\\.com.*"
+    ],
+    "Cargo": [
+        ".*cargo\\.site.*"
+    ],
+    "Feedpress": [
+        ".*redirect\\.feedpress\\.me.*"
+    ],
+    "Surge.sh": [
+        ".*surge\\.sh.*"
+    ],
+    "Webflow": [
+        ".*webflow\\.io.*"
+    ],
+    "Kinsta": [
+        ".*kinsta\\.cloud.*"
+    ],
+    "LaunchRock": [
+        ".*launchrock\\.com.*"
+    ]
+}
