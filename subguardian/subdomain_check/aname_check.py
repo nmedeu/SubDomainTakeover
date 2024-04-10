@@ -5,17 +5,19 @@ import socket
 
 def check_whois(ip):
     """Check Whois information for a list of IP addresses."""
-    print(f"\nWhois information for {ip}:")
     try:
         w = whois.whois(ip)
-        return(w)
+        if w:
+            return True
+        else:
+            return False
     except Exception as e:
         print(f"Error retrieving Whois for {ip}: {e}")
-        return None
+        return False
     
-def is_relevant(domain, w):
-    """ Check if the A record IP is relevant (currently only returning the org name for user validation) """
-    return w['org']
+# def is_relevant_check(domain, w):
+#     """ Check if the A record IP is relevant (currently only returning the org name for user validation) """
+#     return w['org']
 
 
 def check_web_server(ip):
@@ -63,7 +65,6 @@ def scan_common_ports(ip):
 
 def aname_check(anames):
     vulnerable = []
-
     for aname in anames:
 
         # Check webserver
@@ -76,16 +77,24 @@ def aname_check(anames):
             open_ports = scan_common_ports(aname['address'])
             
             if not open_ports:
-                vulnerable.append(anames.domain)
+                vulnerable.append({aname['name']: "Potentially Vulnerable"})
 
             # WhoIs check
-            w = check_whois(aname['address'])
+            w = check_whois(aname['name'])
+            
+            if not w:
+                vulnerable.append({aname['name']: "Potentially Vulnerable"})
 
-            try:
-                is_relevant = is_relevant(aname['name'], w)
-            except Exception as e:
-                pass
 
+            # Check relevancy of aname ip ???
+            # try:
+            #     is_relevant = is_relevant_check(aname['name'], w)
+            #     if not is_relevant:
+            #         vulnerable.append({aname['name']: "Vulnerable"})
+            # except Exception as e:
+            #     print(f"WhoIs failed with error {e}")
+            #     print(aname)
+            #     vulnerable.append({aname['name']: "Potentially Vulnerable"})
 
     return vulnerable
 

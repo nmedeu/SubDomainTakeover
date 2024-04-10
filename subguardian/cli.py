@@ -305,3 +305,5 @@ def main():
 
     # Check A record vulnerabilities
     print(aname_check(records['A']))
+
+    
