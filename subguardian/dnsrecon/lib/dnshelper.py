@@ -81,7 +81,8 @@ class DnsHelper:
         https://dnspython.readthedocs.io/en/latest/resolver-class.html#dns.resolver.Resolver.resolve
         """
         try:
-            return self._res.resolve(addr_, type_, tcp=self._is_tcp)
+            res = dns.resolver.Resolver()
+            return res.resolve(addr_, type_, tcp=self._is_tcp)
         except (
             OSError,
             dns.exception.Timeout,

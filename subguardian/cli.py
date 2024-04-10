@@ -14,7 +14,8 @@ from .subdomain_enum.sublist3r import sublist3r
 from .dnsrecon.dnsrecon import check_nxdomain_hijack, dnsrecon, socket_resolv
 from .dnsrecon.lib.dnshelper import DnsHelper
 from .lib.helper import *
-from .subdomain_check.cname_check import cname_check
+#from .subdomain_check.cname_check import cname_check
+from .subdomain_check.aname_check import aname_check
 from .subdomain_check.ns_check import ns_check
 
 
@@ -258,39 +259,36 @@ def main():
     banner()
 
 
-    # # Sublist3r
+    # Sublist3r
 
-    # print(B + "Running Sublist3r ")
-    # subdomains = sublist3r(domain, threads, savefile, silent=False, verbose=verbose, enable_bruteforce=enable_bruteforce)
+    print(B + "Running Sublist3r ")
+    subdomains = sublist3r(domain, threads, savefile, silent=False, verbose=verbose, enable_bruteforce=enable_bruteforce)
     
-    # #print(subdomains) # list of subdomains
+    #print(subdomains) # list of subdomains
 
     
 
-    # # dnsrecon
+    # dnsrecon
 
-    # print(B + "Running dnsrecon ")
-    # records = dnsrecon(domain, types, type_map, res, request_timeout, do_output, xfr, yandex, do_crt, zonewalk, threads)
-    # records = sort_records(records)
+    print(B + "Running dnsrecon ")
+    records = dnsrecon(domain, types, type_map, res, request_timeout, do_output, xfr, yandex, do_crt, zonewalk, threads)
+    records = sort_records(records)
 
 
-    # # add sublist3r subdomains into reords
+    # add sublist3r subdomains into reords
 
-    # records = unique_records(records)
-    # records = add_sublist3r_if_cname_absent(records, subdomains)
+    records = unique_records(records)
+    records = add_sublist3r_if_cname_absent(records, subdomains)
 
-    # print(records)
+    print(records)
 
 
     # bucrib.com
-    records = {'A': [{'address': '185.199.108.153', 'name': 'subdomaintakeover1.github.io', 'type': 'A'}, {'address': '154.41.250.134', 'name': 'bucrib.com', 'type': 'A'}, {'address': '185.199.109.153', 'name': 'subdomaintakeover1.github.io', 'type': 'A'}, {'address': '185.199.108.153', 'name': 'nmedeu.github.io', 'type': 'A'}, {'address': '185.199.109.153', 'name': 'nmedeu.github.io', 'type': 'A'}, {'address': '185.199.110.153', 'name': 'nmedeu.github.io', 'type': 'A'}, {'address': '185.199.111.153', 'name': 'nmedeu.github.io', 'type': 'A'}, {'address': '185.199.111.153', 'name': 'subdomaintakeover1.github.io', 'type': 'A'}, {'address': '191.101.104.5', 'domain': 'bucrib.com', 'name': 'bucrib.com', 'type': 'A'}, {'address': '185.199.110.153', 'name': 'subdomaintakeover1.github.io', 'type': 'A'}], 'AAAA': [{'address': '2a02:4780:1e:4d74:359f:132b:e1f3:ebf3', 'domain': 'bucrib.com', 'name': 'bucrib.com', 'type': 'AAAA'}, {'address': '2a02:4780:1d:30ed:ee97:7895:49c9:e729', 'name': 'bucrib.com', 'type': 'AAAA'}], 'CNAME': [{'name': 'forms.bucrib.com', 'target': 'nmedeu.github.io', 'type': 'CNAME'}, {'name': 'blog.bucrib.com', 'target': 'subdomaintakeover1.github.io', 'type': 'CNAME'}], 'MX': [{'address': '172.65.182.103', 'domain': 'bucrib.com', 'exchange': 'mx1.hostinger.com', 'type': 'MX'}, {'address': '2606:4700:90:0:c1f8:f874:2386:b61f', 'domain': 'bucrib.com', 'exchange': 'mx2.hostinger.com', 'type': 'MX'}, {'address': '2606:4700:90:0:c1f8:f874:2386:b61f', 'domain': 'bucrib.com', 'exchange': 'mx1.hostinger.com', 'type': 'MX'}, {'address': '172.65.182.103', 'domain': 'bucrib.com', 'exchange': 'mx2.hostinger.com', 'type': 'MX'}], 'NS': [{'Version': '"2024.3.1"', 'address': '162.159.25.42', 'domain': 'bucrib.com', 'recursive': 'True', 'target': 'ns2.dns-parking.com', 'type': 'NS'}, {'Version': '', 'address': '2400:cb00:2049:1::a29f:192a', 'domain': 'bucrib.com', 'recursive': 'False', 'target': 'ns2.dns-parking.com', 'type': 'NS'}, {'Version': '', 'address': '2400:cb00:2049:1::a29f:18c9', 'domain': 'bucrib.com', 'recursive': 'False', 'target': 'ns1.dns-parking.com', 'type': 'NS'}, {'Version': '"2024.3.1"', 'address': '162.159.24.201', 'domain': 'bucrib.com', 'recursive': 'True', 'target': 'ns1.dns-parking.com', 'type': 'NS'}], 'SOA': [{'address': '2400:cb00:2049:1::a29f:18c9', 'domain': 'bucrib.com', 'mname': 'ns1.dns-parking.com', 'type': 'SOA'}, {'address': '162.159.24.201', 'domain': 'bucrib.com', 'mname': 'ns1.dns-parking.com', 'type': 'SOA'}], 'TXT': [{'domain': 'bucrib.com', 'name': 'bucrib.com', 'strings': 'v=spf1 include:_spf.mail.hostinger.com ~all', 'type': 'TXT'}, {'domain': 'bucrib.com', 'name': '_dmarc.bucrib.com', 'strings': 'v=DMARC1; p=none', 'type': 'TXT'}], 'sublist3r': [{'name': 'www.bucrib.com', 'type': 'subdomain'}]}
+    #records = {'A': [{'address': '154.62.106.240', 'name': 'bucrib.com', 'type': 'A'}, {'address': '185.199.109.153', 'name': 'nmedeu.github.io', 'type': 'A'}, {'address': '185.199.111.153', 'name': 'nmedeu.github.io', 'type': 'A'}, {'address': '185.199.110.153', 'name': 'nmedeu.github.io', 'type': 'A'}, {'address': '185.199.109.153', 'name': 'subdomaintakeover1.github.io', 'type': 'A'}, {'address': '185.199.108.153', 'name': 'subdomaintakeover1.github.io', 'type': 'A'}, {'address': '185.199.111.153', 'name': 'subdomaintakeover1.github.io', 'type': 'A'}, {'address': '185.199.108.153', 'name': 'nmedeu.github.io', 'type': 'A'}, {'address': '185.199.110.153', 'name': 'subdomaintakeover1.github.io', 'type': 'A'}, {'address': '84.32.84.228', 'domain': 'bucrib.com', 'name': 'bucrib.com', 'type': 'A'}], 'AAAA': [{'address': '2a02:4780:22:3fd0:baed:abfa:e6e9:58d3', 'name': 'bucrib.com', 'type': 'AAAA'}, {'address': '2a02:4780:84:6756:6793:3343:1c60:a793', 'domain': 'bucrib.com', 'name': 'bucrib.com', 'type': 'AAAA'}], 'CNAME': [{'name': 'forms.bucrib.com', 'target': 'nmedeu.github.io', 'type': 'CNAME'}, {'name': 'blog.bucrib.com', 'target': 'subdomaintakeover1.github.io', 'type': 'CNAME'}], 'MX': [{'address': '172.65.182.103', 'domain': 'bucrib.com', 'exchange': 'mx2.hostinger.com', 'type': 'MX'}, {'address': '172.65.182.103', 'domain': 'bucrib.com', 'exchange': 'mx1.hostinger.com', 'type': 'MX'}, {'address': '2606:4700:90:0:c1f8:f874:2386:b61f', 'domain': 'bucrib.com', 'exchange': 'mx1.hostinger.com', 'type': 'MX'}, {'address': '2606:4700:90:0:c1f8:f874:2386:b61f', 'domain': 'bucrib.com', 'exchange': 'mx2.hostinger.com', 'type': 'MX'}], 'NS': [{'Version': '"2024.3.1"', 'address': '162.159.25.42', 'domain': 'bucrib.com', 'recursive': 'True', 'target': 'ns2.dns-parking.com', 'type': 'NS'}, {'Version': '', 'address': '162.159.24.201', 'domain': 'bucrib.com', 'recursive': 'True', 'target': 'ns1.dns-parking.com', 'type': 'NS'}, {'Version': '', 'address': '2400:cb00:2049:1::a29f:18c9', 'domain': 'bucrib.com', 'recursive': 'False', 'target': 'ns1.dns-parking.com', 'type': 'NS'}, {'Version': '', 'address': '2400:cb00:2049:1::a29f:192a', 'domain': 'bucrib.com', 'recursive': 'False', 'target': 'ns2.dns-parking.com', 'type': 'NS'}], 'SOA': [{'address': '162.159.24.201', 'domain': 'bucrib.com', 'mname': 'ns1.dns-parking.com', 'type': 'SOA'}, {'address': '2400:cb00:2049:1::a29f:18c9', 'domain': 'bucrib.com', 'mname': 'ns1.dns-parking.com', 'type': 'SOA'}], 'TXT': [{'domain': 'bucrib.com', 'name': 'bucrib.com', 'strings': 'v=spf1 include:_spf.mail.hostinger.com ~all', 'type': 'TXT'}, {'domain': 'bucrib.com', 'name': '_dmarc.bucrib.com', 'strings': 'v=DMARC1; p=none', 'type': 'TXT'}], 'sublist3r': [{'name': 'www.bucrib.com', 'type': 'subdomain'}]}
     
     # Jeetcreates.com
     #records = {'A': [{'address': '185.230.63.171', 'name': 'jeetcreates.com', 'type': 'A'}, {'address': '185.230.63.171', 'domain': 'jeetcreates.com', 'name': 'jeetcreates.com', 'type': 'A'}, {'address': '185.230.63.107', 'name': 'jeetcreates.com', 'type': 'A'}, {'address': '185.230.63.186', 'domain': 'jeetcreates.com', 'name': 'jeetcreates.com', 'type': 'A'}, {'address': '185.230.63.107', 'domain': 'jeetcreates.com', 'name': 'jeetcreates.com', 'type': 'A'}, {'address': '185.230.63.186', 'name': 'jeetcreates.com', 'type': 'A'}], 'NS': [{'Version': '', 'address': '216.239.38.100', 'domain': 'jeetcreates.com', 'recursive': 'True', 'target': 'ns3.wixdns.net', 'type': 'NS'}, {'Version': '', 'address': '216.239.36.100', 'domain': 'jeetcreates.com', 'recursive': 'True', 'target': 'ns2.wixdns.net', 'type': 'NS'}], 'SOA': [{'address': '216.239.36.100', 'domain': 'jeetcreates.com', 'mname': 'ns2.wixdns.net', 'type': 'SOA'}], 'sublist3r': [{'name': 'www.jeetcreates.com', 'type': 'subdomain'}]}
-
-    # Google A names
-    records = [{'address': '64.233.185.101', 'name': 'adwords.google.com', 'type': 'A'}, {'address': '142.251.167.123', 'name': 'wifi.l.google.com', 'type': 'A'}, {'address': '142.250.72.100', 'name': 'www.google.com', 'type': 'A'}, {'address': '64.233.176.81', 'name': 'sandbox.google.com', 'type': 'A'}, {'address': '64.233.185.102', 'name': 'adwords.google.com', 'type': 'A'}, {'address': '216.239.44.94', 'name': 'soaproxytest01.ext.google.com', 'type': 'A'}, {'address': '74.125.138.84', 'name': 'accounts.google.com', 'type': 'A'}, {'address': '216.239.45.170', 'name': 'mtv-da.ext.google.com', 'type': 'A'}, {'address': '64.233.185.138', 'name': 'adwords.google.com', 'type': 'A'}, {'address': '72.14.225.70', 'name': 'corp-soaproxyprod.l.google.com', 'type': 'A'}, {'address': '172.253.63.129', 'name': 'uberproxy-with-cn.l.google.com', 'type': 'A'}, {'address': '142.251.40.142', 'name': 'audioads.l.google.com', 'type': 'A'}, {'address': '72.14.229.178', 'name': 'twd-da.ext.google.com', 'type': 'A'}, {'address': '216.239.44.73', 'name': 'cod.ext.google.com', 'type': 'A'}, {'address': '142.251.40.142', 'name': 'www3.l.google.com', 'type': 'A'}, {'address': '142.250.72.110', 'domain': 'google.com', 'name': 'google.com', 'type': 'A'}, {'address': '64.233.185.139', 'name': 'adwords.google.com', 'type': 'A'}, {'address': '64.233.176.81', 'name': 'ecc-test.sandbox.google.com', 'type': 'A'}, {'address': '64.233.185.100', 'name': 'adwords.google.com', 'type': 'A'}, {'address': '142.250.80.37', 'name': 'mail.google.com', 'type': 'A'}, {'address': '142.250.81.239', 'name': 'sslvideo-upload.l.google.com', 'type': 'A'}, {'address': '142.251.40.174', 'name': 'www3.l.google.com', 'type': 'A'}, {'address': '64.233.176.90', 'name': 'cert-test.sandbox.google.com', 'type': 'A'}, {'address': '64.233.185.113', 'name': 'adwords.google.com', 'type': 'A'}, {'address': '142.250.191.238', 'name': 'google.com', 'type': 'A'}, {'address': '142.250.80.75', 'name': 'mobile.l.google.com', 'type': 'A'}, {'address': '142.251.163.188', 'name': 'mobile-gtalk.l.google.com', 'type': 'A'}, {'address': '216.239.44.90', 'name': 'eggroll.ext.google.com', 'type': 'A'}]
-
+    
     # Check CNAME vulnearbilities
 
     # print(type(records['sublist3r']))
@@ -301,7 +299,9 @@ def main():
     # Check NS vulnerabilities
 
     # print(records['sublist3r'][0]['name'])
-    print("NS records are: ", records['NS'])
-    print(ns_check(records['NS']))
+    # print("NS records are: ", records['NS'])
+    # print(ns_check(records['NS']))
 
 
+    # Check A record vulnerabilities
+    print(aname_check(records['A']))

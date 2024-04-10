@@ -1192,6 +1192,8 @@ def general_enum(
             crt_rcd = se_result_process(res, scrape_crtsh(domain))
             if crt_rcd:
                 for r in crt_rcd:
+                    r['record_type'] = r['type']
+                    r['type'] = 'crt'
                     if 'address' in crt_rcd:
                         ip_for_whois.append(r['address'])
                 returned_records.extend(crt_rcd)
