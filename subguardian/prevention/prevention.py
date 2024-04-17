@@ -4,6 +4,8 @@ from mx_check import mx_check
 from ns_check import ns_check
 from cname_check import cname_check, check_cname_for_external_services
 from aname_check import aname_check
+import schedule
+import time
 
 # Configure logging
 logging.basicConfig(level=logging.INFO, format='%(asctime)s - %(levelname)s - %(message)s')
@@ -43,6 +45,15 @@ def monitor_subdomains():
 
 
         # Log if no vulnerabilities are found
-        if not (txt_vulnerabilities or cname_vulnerabilities or mx_vulnerabilities or ns_vulnerabilities):
+        if not (txt_vulnerabilities or cname_vulnerabilities or mx_vulnerabilities or ns_vulnerabilities or aname_vulnerabilities):
             logging.info(f"No vulnerabilities found for {subdomain}")
+
+def job():
+    monitor_subdomains()
+
+schedule.every().hour.do(job)
+
+while True:
+    schedule.run_pending()
+    time.sleep(60)  # Sleep for a minute and then check if there's a job pending
 
