@@ -15,17 +15,25 @@ except Exception as e:
     logging.error(f"Failed to load TXT vulnerability patterns: {e}")
     txt_patterns = {}
 
+import dns.resolver
+
 def fetch_txt_records(subdomain):
     """Fetch TXT records for a given subdomain."""
+    records = {}
     try:
         answers = dns.resolver.resolve(subdomain, 'TXT')
-        return [str(rdata.strings[0], 'utf-8') for rdata in answers]
+        if answers.rrset is not None:
+            records[subdomain] = [rdata.to_text() for rdata in answers.rrset]
+        else:
+            records[subdomain] = []
     except dns.resolver.NoAnswer:
-        logging.warning(f"No TXT record found for {subdomain}.")
-        return []
+        print(f"No TXT record found for {subdomain}.")
+        records[subdomain] = []
     except Exception as e:
-        logging.error(f"An error occurred while fetching TXT records for {subdomain}: {e}")
-        return []
+        print(f"An error occurred while fetching TXT records for {subdomain}: {e}")
+        records[subdomain] = []
+    return records
+
 
 def check_for_vulnerabilities(subdomain):
     """Check TXT records of a subdomain for potential takeover vulnerabilities."""
