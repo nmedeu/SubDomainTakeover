@@ -2,6 +2,37 @@ import smtplib
 import ssl
 import whois
 import datetime
+import dns.resolver
+
+
+def check_mx_records(domain):
+    try:
+        # Fetch MX records for the specified domain
+        mx_records = dns.resolver.resolve(domain, 'MX')
+        if not mx_records:
+            return f"No MX records found for domain: {domain}"
+        
+        results = []
+        # Check each MX record
+        for record in mx_records:
+            mx_host = str(record.exchange).strip('.')
+            try:
+                # Try to resolve the MX host to an IP address
+                dns.resolver.resolve(mx_host, 'A')
+                results.append(f"MX host resolved: {mx_host}")
+            except dns.resolver.NoAnswer:
+                results.append(f"MX host not resolved: {mx_host}")
+            except Exception as e:
+                results.append(f"Error resolving MX host {mx_host}: {str(e)}")
+
+        return results
+
+    except dns.resolver.NoAnswer:
+        return f"No MX records found for domain: {domain}"
+    except Exception as e:
+        return f"Error checking MX records for domain {domain}: {str(e)}"
+
+
 
 def check_mx_connect(mx_record):
     # Attempt to connect to the SMTP server
@@ -25,13 +56,13 @@ def check_mx_connect(mx_record):
         else:
             print("TLS might not be supported")
             return "TSL"
-
         # Close the connection
         server.quit()
         
         print(f"Connection to {smtp_server} with ip {ip} on port {port} was successful.")
     except Exception as e:
         print(f"Error connecting to {smtp_server} with ip {ip} on port {port}: {e}")
+
 
 def check_if_expired(mx_record):
     mx_domain = str(mx_record['exchange'])
@@ -56,6 +87,7 @@ def check_if_expired(mx_record):
     
 def mx_check(mx_records):
     vulnerability = {}
+
     for mx_record in mx_records:
         connect_result = check_mx_connect(mx_record)
         if connect_result == "TSL":
