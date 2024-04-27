@@ -14,9 +14,10 @@ from .subdomain_enum.sublist3r import sublist3r
 from .dnsrecon.dnsrecon import check_nxdomain_hijack, dnsrecon, socket_resolv
 from .dnsrecon.lib.dnshelper import DnsHelper
 from .lib.helper import *
-#from .subdomain_check.cname_check import cname_check
+from .subdomain_check.cname_check import cname_check
 from .subdomain_check.aname_check import aname_check
 from .subdomain_check.ns_check import ns_check
+from .prevention.cloudfare import delete_dns_records
 
 
 CONFIG = {'disable_check_recursion': False, 'disable_check_bindversion': False}
@@ -85,7 +86,7 @@ def process_range(arg):
 def parse_args():
     # parse the args
     parser = argparse.ArgumentParser(epilog='\tExample: \r\npython ' + sys.argv[0] + " -d google.com")
-    parser.error = parser_error
+    parser.error = parser_error # type: ignore
     parser._optionals.title = "OPTIONS"
 
     # sublist3r args
@@ -299,11 +300,19 @@ def main():
     # Check NS vulnerabilities
 
     # print(records['sublist3r'][0]['name'])
-    # print("NS records are: ", records['NS'])
+    # print("NS records are: ", records['NS'])s
     # print(ns_check(records['NS']))
 
 
     # Check A record vulnerabilities
-    print(aname_check(records['A']))
+    for key, value in records.items() :
+        print (key)
+
+    cname_vulnerabilities = cname_check(records['sublist3r'])
+
+    # print(cname_vulnerabilities)
+
+    delete_dns_records(cname_vulnerabilities)
+
 
     

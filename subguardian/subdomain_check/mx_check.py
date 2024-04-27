@@ -33,7 +33,6 @@ def check_mx_records(domain):
         return f"Error checking MX records for domain {domain}: {str(e)}"
 
 
-
 def check_mx_connect(mx_record):
     # Attempt to connect to the SMTP server
     smtp_server = str(mx_record['exchange'])
@@ -84,6 +83,7 @@ def check_if_expired(mx_record):
     except whois.parser.PywhoisError:
         print(f"WHOIS data not found for MX domain {mx_domain}")
         return False
+    
     
 def mx_check(mx_records):
     vulnerability = {}

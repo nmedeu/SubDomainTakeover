@@ -3,9 +3,10 @@ import requests
 from bs4 import BeautifulSoup
 import re
 import json
+import os
 
 try: 
-    with open('fingerprints.json', 'r') as f:
+    with open('/Users/nurassylmedeuov/Desktop/SubdomainTakevoer/SubDomainTakeover/subguardian/subdomain_check/fingerprints.json', 'r') as f:
         service_fingerprints = json.load(f)
         print("JSON loaded successfully. Number of services loaded:", len(service_fingerprints))
 except Exception as e:
@@ -49,7 +50,7 @@ def check_http_response(subdomain):
         print(f"An error occurred: {e}")
 
 
-    return vulnerable
+    return False
 
 
 def check_for_error_messages(subdomain):
@@ -166,10 +167,6 @@ def check_for_fingerprint(subdomain, fingerprint):
     except requests.RequestException as e:
         print(f"Failed to fetch the webpage for {subdomain}: {e}")
     return False
-
-
-subdomain = 'blog.bucrib.com'
-check_cname_for_external_services(subdomain)
 
 
 def cname_check(cnames):
