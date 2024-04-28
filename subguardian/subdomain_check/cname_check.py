@@ -5,6 +5,9 @@ import re
 
 def load_json_data(filepath):
     """Load JSON data from a file."""
+    # Load data from files
+    service_fingerprints = load_json_data('/Users/jeet/Library/CloudStorage/OneDrive-Personal/Boston University/2023-2024/Spring/Cybersecurity/SubGuardian/SubDomainTakeover/subguardian/subdomain_check/fingerprints.json')
+    error_patterns = load_error_patterns('/Users/jeet/Library/CloudStorage/OneDrive-Personal/Boston University/2023-2024/Spring/Cybersecurity/SubGuardian/SubDomainTakeover/subguardian/subdomain_check/errors.txt')
     try:
         with open(filepath, 'r') as f:
             data = json.load(f)
@@ -74,13 +77,3 @@ def analyze_subdomains(subdomains, service_fingerprints, error_patterns):
         else:
             print(f"No vulnerabilities found for {subdomain}.")
     return vulnerable_subdomains
-
-
-# Load data from files
-service_fingerprints = load_json_data('/Users/jeet/Library/CloudStorage/OneDrive-Personal/Boston University/2023-2024/Spring/Cybersecurity/SubGuardian/SubDomainTakeover/subguardian/subdomain_check/fingerprints.json')
-error_patterns = load_error_patterns('/Users/jeet/Library/CloudStorage/OneDrive-Personal/Boston University/2023-2024/Spring/Cybersecurity/SubGuardian/SubDomainTakeover/subguardian/subdomain_check/errors.txt')
-
-# Example usage
-subdomains_list = ['blog.bucrib.com', 'forms.bucrib.com']
-vulnerable_subdomains = analyze_subdomains(subdomains_list, service_fingerprints, error_patterns)
-print("Vulnerable subdomains:", vulnerable_subdomains)
