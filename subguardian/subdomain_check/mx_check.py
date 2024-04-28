@@ -30,7 +30,8 @@ def check_mx_connect(mx_record):
         
         #print(f"Connection to {smtp_server} with ip {ip} on port {port} was successful.")
     except Exception as e:
-        print(f"Error connecting to {smtp_server} with ip {ip} on port {port}: {e}")
+        return "exception"
+        # print(f"Error connecting to {smtp_server} with ip {ip} on port {port}: {e}")
 
 
 def check_if_expired(mx_record):
@@ -62,6 +63,8 @@ def mx_check(mx_records):
         connect_result = check_mx_connect(mx_record)
         if connect_result == "TSL":
             vulnerability[mx_record['exchange']] = "Might Lack of support for STARTTLS encryption."
+        if connect_result == "exception":
+            vulnerability[mx_record['exchange']] = "SMTP server might reject the connection, possibly due to security settings"
 
         # Check for expired domain for current NS record
         expired = check_if_expired(mx_record)
