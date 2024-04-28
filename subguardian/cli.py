@@ -304,17 +304,13 @@ def main():
     # print(ns_check(records['NS']))
 
 
-    # Check A record vulnerabilities
-    for key, value in records.items() :
-        print (key)
+    sublist3r_records = records['sublist3r']
+    domain_names = [record['name'] for record in sublist3r_records]
+    cname_vulnerabilities = cname_check(domain_names)
 
-    print(records)
-    cname_vulnerabilities = cname_check(records['sublist3r'])
+    print(cname_vulnerabilities)
 
-
-    # print(cname_vulnerabilities)
-
-    delete_dns_records(cname_vulnerabilities)
+    #delete_dns_records(cname_vulnerabilities)
 
 
     

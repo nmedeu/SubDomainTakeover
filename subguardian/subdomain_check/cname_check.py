@@ -87,6 +87,6 @@ def cname_check(subdomains):
 
 
 # Example usage
-subdomains_list = ['blog.bucrib.com', 'forms.bucrib.com']
-vulnerable_subdomains = cname_check(subdomains_list)
-print("Vulnerable subdomains:", vulnerable_subdomains)
+#subdomains_list = ['blog.bucrib.com', 'forms.bucrib.com']
+#vulnerable_subdomains = cname_check(subdomains_list)
+#print("Vulnerable subdomains:", vulnerable_subdomains)
