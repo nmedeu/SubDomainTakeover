@@ -81,6 +81,7 @@ def scrape_crtsh(dom):
         response = requests.get(url, headers=headers, timeout=30)
         response.raise_for_status()  # This will raise an HTTPError for bad responses
         data = response.content
+        #print(data)
     except requests.exceptions.HTTPError as e:
         print_error(f'Bad HTTP status from crt.sh: "{e.response.status_code}"')
         return results
@@ -90,18 +91,34 @@ def scrape_crtsh(dom):
 
     root = etree.HTML(data)
     tbl = root.xpath('//table/tr/td/table/tr/td[5]')
+    tbl1 = root.xpath('//table/tr/td/table/tr/td[6]')
+    #print(tbl)
     if len(tbl) < 1:
         print_error('Certificates for subdomains not found')
         return results
 
     for ent in tbl:
         sub_dom = ent.text
+        #print(sub_dom)
         if not sub_dom.endswith('.' + dom):
             continue
         if sub_dom.startswith('*.'):
-            print_status(f'\t {sub_dom} wildcard')
+            #print_status(f'\t {sub_dom} wildcard')
             continue
         if sub_dom not in results:
             results.append(sub_dom)
+
+    for ent in tbl1:
+        sub_dom = ent.text
+        if not sub_dom.endswith('.' + dom):
+            continue
+        if sub_dom.startswith('*.'):
+            #print_status(f'\t {sub_dom} wildcard')
+            continue
+        if sub_dom not in results:
+            results.append(sub_dom)
+    
+    
+
 
     return results

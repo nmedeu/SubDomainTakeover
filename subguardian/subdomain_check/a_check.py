@@ -26,12 +26,15 @@ def check_web_server(ip):
             if response:
                 return True
         except requests.ConnectionError:
-            print(f"Failed to connect to {url}")
+            #print(f"Failed to connect to {url}")
+            return False
         except requests.Timeout:
-            print(f"Timeout when connecting to {url}")
+            #print(f"Timeout when connecting to {url}")
+            return False
         except requests.RequestException as e:
-            print(f"Error during request to {url}: {e}")
-    return False
+            #print(f"Error during request to {url}: {e}")
+            return False
+    
 
 
 def read_ports_from_file(file_path):
@@ -90,5 +93,7 @@ def a_check(a_record):
     return vulnerabilities
 
 
-a_record = [{'address': '172.67.128.225', 'name': 'bucrib.com', 'type': 'A'}, {'address': '104.21.2.73', 'name': 'bucrib.com', 'type': 'A'}, {'address': '104.21.2.73', 'domain': 'bucrib.com', 'name': 'bucrib.com', 'type': 'A'}, {'address': '172.67.128.225', 'domain': 'bucrib.com', 'name': 'bucrib.com', 'type': 'A'}]
-print(a_check(a_record))
+#a_record = [{'address': '172.67.128.225', 'name': 'bucrib.com', 'type': 'A'}, {'address': '104.21.2.73', 'name': 'bucrib.com', 'type': 'A'}, {'address': '104.21.2.73', 'domain': 'bucrib.com', 'name': 'bucrib.com', 'type': 'A'}, {'address': '172.67.128.225', 'domain': 'bucrib.com', 'name': 'bucrib.com', 'type': 'A'}]
+
+# a_record = [{'address': '78.246.38.41', 'name': 'bucrib.com', 'type': 'A'}]
+# print(a_check(a_record))

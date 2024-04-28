@@ -173,7 +173,7 @@ def parse_args():
             '-p', '--prevent',
             type=str,
             dest='prevent_hosts',
-            help="""Choose DNS hosts you use to prevent subdomain takeover.
+            help="""Choose DNS hosts you use to prevent subdomain takeover, and it will delete all the vulnearble DNS records.
 Possible types:
     cloudfare:       prevents cloudfare misconfigurations,
 
@@ -369,9 +369,9 @@ def main():
     print()
     print()
 
-
-    print(records['AAAA'])
     print(records['A'])
+    print()
+    print(subdomains)
 
 
 

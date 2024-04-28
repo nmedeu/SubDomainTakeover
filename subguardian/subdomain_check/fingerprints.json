@@ -703,7 +703,7 @@
   },
   {
     "cicd_pass": false,
-    "cname": [],
+    "cname": ["domains.smugmug.com"],
     "discussion": "[Issue #60](https://github.com/EdOverflow/can-i-take-over-xyz/issues/60)",
     "documentation": "",
     "fingerprint": "",

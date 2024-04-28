@@ -1334,131 +1334,204 @@ def get_next(res, target, ns, timeout):
     return next_host
 
 
-def ds_zone_walk(res, domain, lifetime):
-    """
-    Perform DNSSEC Zone Walk using NSEC records found in the error an additional
-    records section of the message to find the next host to query in the zone.
-    """
-    print_status(f'Performing NSEC Zone Walk for {domain}')
-    print_status(f'Getting SOA record for {domain}')
-
-    nameserver = ''
-
+def get_nameservers(domain):
     try:
-        # Get the list of SOA servers, should be a list of lists
-        target_soas = res.get_soa()
-        if target_soas:
-            first_ns = target_soas[0]
-            # The 3rd value is the SOA's IP address
-            if first_ns:
-                nameserver = first_ns[2]
+        # Get the nameservers for the domain
+        answers = dns.resolver.resolve(domain, 'NS')
+        nameservers = [answer.to_text() for answer in answers]
+        return nameservers
+    except Exception as e:
+        return str(e)
 
-                if nameserver:
-                    # At this point, we should have a name server IP in 'nameserver'
-                    print_status(f'Name Server {nameserver} will be used')
-                    res = DnsHelper(domain, nameserver, lifetime)
+def get_ip_addresses(nameservers):
+    ip_addresses = {}
+    for ns in nameservers:
+        try:
+            # Resolve each nameserver to its corresponding IP address
+            answers = dns.resolver.resolve(ns, 'A')  # 'A' for IPv4, use 'AAAA' for IPv6
+            ips = [answer.to_text() for answer in answers]
+            ip_addresses[ns] = ips
+        except Exception as e:
+            ip_addresses[ns] = str(e)
+    return ip_addresses
 
-        if not nameserver:
-            error('This zone appears to be misconfigured, no SOA record found.')
 
-    except Exception as err:
-        error(f'Exception while trying to determine the SOA records for domain {domain}: {err}')
+# def ds_zone_walk(res, domain, lifetime):
+#     """
+#     Perform DNSSEC Zone Walk using NSEC records found in the error an additional
+#     records section of the message to find the next host to query in the zone.
+#     """
+#     print_status(f'Performing NSEC Zone Walk for {domain}')
+#     print_status(f'Getting SOA record for {domain}')
 
-    timeout = res._res.timeout
+#     nameserver = ''
+
+#     try:
+#         # Get the list of SOA servers, should be a list of lists
+#         target_soas = res.get_soa()
+#         if target_soas:
+#             first_ns = target_soas[0]
+#             # The 3rd value is the SOA's IP address
+#             if first_ns:
+#                 nameserver = first_ns[2]
+
+#                 if nameserver:
+#                     print(nameserver)
+#                     # At this point, we should have a name server IP in 'nameserver'
+#                     print_status(f'Name Server {nameserver} will be used')
+#                     res = DnsHelper(domain, nameserver, lifetime)
+
+#         if not nameserver:
+#             error('This zone appears to be misconfigured, no SOA record found.')
+
+#     except Exception as err:
+#         error(f'Exception while trying to determine the SOA records for domain {domain}: {err}')
+
+#     timeout = res._res.timeout
+
+#     records = []
+
+#     transformations = [
+#         # Send the hostname as-is
+#         lambda h, hc, dc: h,
+#         # Prepend a zero as a subdomain
+#         lambda h, hc, dc: f'0.{h}',
+#         # Append a hyphen to the host portion
+#         lambda h, hc, dc: f'{hc}-.{dc}' if hc else None,
+#         # Double the last character of the host portion
+#         lambda h, hc, dc: f'{hc}{hc[-1]}.{dc}' if hc else None,
+#     ]
+
+#     pending = {domain}
+#     finished = set()
+
+#     try:
+#         while pending:
+#             # Get the next pending hostname
+#             hostname = pending.pop()
+#             finished.add(hostname)
+
+#             # Get all the records we can for the hostname
+#             records.extend(lookup_next(hostname, res))
+
+#             # Arrange the arguments for the transformations
+#             fields = re.search(r'^(^[^.]*)\.(\S+\.\S*)$', hostname)
+
+#             domain_portion = hostname
+#             if fields and fields.group(2):
+#                 domain_portion = fields.group(2)
+
+#             host_portion = ''
+#             if fields and fields.group(1):
+#                 host_portion = fields.group(1)
+
+#             params = [hostname, host_portion, domain_portion]
+
+#             walk_filter = '.' + domain_portion
+#             walk_filter_offset = len(walk_filter) + 1
+
+#             for transformation in transformations:
+#                 # Apply the transformation
+#                 target = transformation(*params)
+#                 if not target:
+#                     continue
+
+#                 # Perform a DNS query for the target and process the response
+#                 if not nameserver:
+#                     response = get_a_answer(res, target, res._res.nameservers[0], timeout)
+#                 else:
+#                     response = get_a_answer(res, target, nameserver, timeout)
+#                 for a in response.authority:
+#                     if a.rdtype != 47:
+#                         continue
+
+#                     # NSEC records give two results:
+#                     #   1) The previous existing hostname that is signed
+#                     #   2) The subsequent existing hostname that is signed
+#                     # Add the latter to our list of pending hostnames
+#                     for r in a:
+#                         # As an optimization Cloudflare (and perhaps others)
+#                         # return '\000.' instead of NODATA when a record doesn't
+#                         # exist. Detect this and avoid becoming tarpitted while
+#                         # permuting the namespace.
+#                         if r.next.to_text()[:5] == '\\000.':
+#                             continue
+
+#                         # Avoid walking outside of the target domain. This
+#                         # happens with certain misconfigured domains.
+#                         if r.next.to_text()[-walk_filter_offset:-1] == walk_filter:
+#                             pending.add(r.next.to_text()[:-1])
+
+#             # Ensure nothing pending has already been queried
+#             pending -= finished
+
+#     except KeyboardInterrupt:
+#         error('You have pressed Ctrl + C. Saving found records.')
+
+#     except dns.exception.Timeout:
+#         error('A timeout error occurred while performing the zone walk please make ')
+#         error('sure you can reach the target DNS Servers directly and requests')
+#         error('are not being filtered. Increase the timeout to a higher number')
+#         error('with --lifetime <time> option.')
+
+#     except EOFError:
+#         error(f'SoA nameserver {nameserver} failed to answer the DNSSEC query for {target}')
+
+#     except socket.error:
+#         error(f'SoA nameserver {nameserver} failed to answer the DNSSEC query for {domain}')
+
+#     # Give a summary of the walk
+#     if len(records) > 0:
+#         print_good(f'{len(records)} records found')
+#     else:
+#         error('Zone could not be walked')
+
+#     return records
+
+
+
+def ds_zone_walk(blank, domain, lifetime):
+    print_status(f'Performing NSEC Zone Walk for {domain}')
+    nameservers = get_nameservers(domain)
+    if not nameservers or isinstance(nameservers, str):
+        error('Failed to retrieve nameservers.')
+        return []
+
+    ip_addresses = get_ip_addresses(nameservers)
+    if not ip_addresses:
+        error('No IP addresses found for nameservers.')
+        return []
 
     records = []
-
-    transformations = [
-        # Send the hostname as-is
-        lambda h, hc, dc: h,
-        # Prepend a zero as a subdomain
-        lambda h, hc, dc: f'0.{h}',
-        # Append a hyphen to the host portion
-        lambda h, hc, dc: f'{hc}-.{dc}' if hc else None,
-        # Double the last character of the host portion
-        lambda h, hc, dc: f'{hc}{hc[-1]}.{dc}' if hc else None,
-    ]
-
     pending = {domain}
     finished = set()
 
     try:
         while pending:
-            # Get the next pending hostname
             hostname = pending.pop()
             finished.add(hostname)
-
-            # Get all the records we can for the hostname
-            records.extend(lookup_next(hostname, res))
-
-            # Arrange the arguments for the transformations
-            fields = re.search(r'^(^[^.]*)\.(\S+\.\S*)$', hostname)
-
-            domain_portion = hostname
-            if fields and fields.group(2):
-                domain_portion = fields.group(2)
-
-            host_portion = ''
-            if fields and fields.group(1):
-                host_portion = fields.group(1)
-
-            params = [hostname, host_portion, domain_portion]
-
-            walk_filter = '.' + domain_portion
-            walk_filter_offset = len(walk_filter) + 1
-
-            for transformation in transformations:
-                # Apply the transformation
-                target = transformation(*params)
-                if not target:
-                    continue
-
-                # Perform a DNS query for the target and process the response
-                if not nameserver:
-                    response = get_a_answer(res, target, res._res.nameservers[0], timeout)
-                else:
-                    response = get_a_answer(res, target, nameserver, timeout)
-                for a in response.authority:
-                    if a.rdtype != 47:
-                        continue
-
-                    # NSEC records give two results:
-                    #   1) The previous existing hostname that is signed
-                    #   2) The subsequent existing hostname that is signed
-                    # Add the latter to our list of pending hostnames
-                    for r in a:
-                        # As an optimization Cloudflare (and perhaps others)
-                        # return '\000.' instead of NODATA when a record doesn't
-                        # exist. Detect this and avoid becoming tarpitted while
-                        # permuting the namespace.
-                        if r.next.to_text()[:5] == '\\000.':
-                            continue
-
-                        # Avoid walking outside of the target domain. This
-                        # happens with certain misconfigured domains.
-                        if r.next.to_text()[-walk_filter_offset:-1] == walk_filter:
-                            pending.add(r.next.to_text()[:-1])
+            for ns, ips in ip_addresses.items():
+                for ip in ips:
+                    try:
+                        res = dns.resolver.Resolver()
+                        res.nameservers = [ip]
+                        res.lifetime = lifetime
+                        response = res.resolve(hostname, 'A')
+                        # Handle the DNS responses here
+                    except dns.exception.DNSException as e:
+                        error(f'Error querying {hostname} at {ip}: {e}')
+                    except KeyboardInterrupt:
+                        error('You have pressed Ctrl + C. Saving found records.')
+                        return records
 
             # Ensure nothing pending has already been queried
             pending -= finished
 
-    except KeyboardInterrupt:
-        error('You have pressed Ctrl + C. Saving found records.')
+    except Exception as e:
+        error(f'An error occurred: {e}')
 
-    except dns.exception.Timeout:
-        error('A timeout error occurred while performing the zone walk please make ')
-        error('sure you can reach the target DNS Servers directly and requests')
-        error('are not being filtered. Increase the timeout to a higher number')
-        error('with --lifetime <time> option.')
-
-    except EOFError:
-        error(f'SoA nameserver {nameserver} failed to answer the DNSSEC query for {target}')
-
-    except socket.error:
-        error(f'SoA nameserver {nameserver} failed to answer the DNSSEC query for {domain}')
-
-    # Give a summary of the walk
-    if len(records) > 0:
+    # Summarize the walk
+    if records:
         print_good(f'{len(records)} records found')
     else:
         error('Zone could not be walked')

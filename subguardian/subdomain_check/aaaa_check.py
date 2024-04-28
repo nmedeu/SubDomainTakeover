@@ -23,14 +23,18 @@ def check_web_server(ip):
         try:
             response = requests.get(url, timeout=5)
             #print(f"Response from {url}: {response.status_code}")
-            return True
+            if response:
+                return True
         except requests.ConnectionError:
-            print(f"Failed to connect to {url}")
+            #print(f"Failed to connect to {url}")
+            return False
         except requests.Timeout:
-            print(f"Timeout when connecting to {url}")
+            #print(f"Timeout when connecting to {url}")
+            return False
         except requests.RequestException as e:
-            print(f"Error during request to {url}: {e}")
-    return False
+            #print(f"Error during request to {url}: {e}")
+            return False
+    
 
 
 def read_ports_from_file(file_path):
@@ -44,7 +48,7 @@ def read_ports_from_file(file_path):
 
 
 def scan_common_ports(ip):
-    common_ports = read_ports_from_file('./subguardian/subdomain_check/ports.txt')
+    common_ports = read_ports_from_file('subguardian/subdomain_check/ports.txt')
     open_ports = []
     for port in common_ports:
         try:
@@ -60,7 +64,8 @@ def scan_common_ports(ip):
 
 
 def aaaa_check(aaaa_records):
-    vulnerable_domains = {}
+    vulnerabilities = {}
+    vulnerability_reason = []
     for aaaa_record in aaaa_records:
 
         # Check web server
@@ -73,19 +78,22 @@ def aaaa_check(aaaa_records):
             open_ports = scan_common_ports(aaaa_record['address'])
             
             if not open_ports:
-                vulnerable_domains[aaaa_record['name']] = ["Potentially Vulnerable (No open common ports)"]
+                vulnerability_reason.append("Potentially Vulnerable (No open common ports)")
 
             # Whois check
             w = check_whois(aaaa_record['name'])
             
             if not w:
-                vulnerable_domains[aaaa_record['name']] = ["Potentially Vulnerable (Whois check failed)"]
+                vulnerability_reason.append("Potentially Vulnerable (Whois check failed)")
+            
+        if vulnerability_reason:
+            vulnerabilities[aaaa_record['name']] = vulnerability_reason
 
-    # if vulnerable_domains == {}:
-    #     return {"NO VULNERABILITY FOUND IN ANAME CHECK"}
-    return vulnerable_domains
+    
+    return vulnerabilities
 
 
-aaaa_record = [{'address': '2606:4700:3036::6815:249', 'domain': 'bucrib.com', 'name': 'bucrib.com', 'type': 'AAAA'}, {'address': '2606:4700:3034::ac43:80e1', 'domain': 'bucrib.com', 'name': 'bucrib.com', 'type': 'AAAA'}, {'address': '2606:4700:3036::6815:249', 'name': 'bucrib.com', 'type': 'AAAA'}, {'address': '2606:4700:3034::ac43:80e1', 'name': 'bucrib.com', 'type': 'AAAA'}]
+aaaa_record = [{'address': '2606:4700:3034::ac43:80e1', 'name': 'bucrib.com', 'type': 'AAAA'}, {'address': '2606:4700:3034::ac43:80e1', 'domain': 'bucrib.com', 'name': 'bucrib.com', 'type': 'AAAA'}, {'address': '2606:4700:3036::6815:249', 'domain': 'bucrib.com', 'name': 'bucrib.com', 'type': 'AAAA'}, {'address': '2606:4700:3036::6815:249', 'name': 'bucrib.com', 'type': 'AAAA'}]
 
-print(aaaa_check(aaaa_records))
+#a_record = [{'address': '78.246.38.41', 'name': 'bucrib.com', 'type': 'A'}]
+print(aaaa_check(aaaa_record))
