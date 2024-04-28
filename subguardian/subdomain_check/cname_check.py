@@ -2,14 +2,13 @@ import dns.resolver
 import requests
 import json
 import re
+import os
 
 
 
 def load_json_data(filepath):
     """Load JSON data from a file."""
     # Load data from files
-    service_fingerprints = load_json_data('/Users/jeet/Library/CloudStorage/OneDrive-Personal/Boston University/2023-2024/Spring/Cybersecurity/SubGuardian/SubDomainTakeover/subguardian/subdomain_check/fingerprints.json')
-    error_patterns = load_error_patterns('/Users/jeet/Library/CloudStorage/OneDrive-Personal/Boston University/2023-2024/Spring/Cybersecurity/SubGuardian/SubDomainTakeover/subguardian/subdomain_check/errors.txt')
     try:
         with open(filepath, 'r') as f:
             data = json.load(f)
@@ -84,8 +83,8 @@ def check_http_response_and_content(subdomain, service_fingerprints, error_patte
 def cname_check(entry):
     subdomains = [record['name'] for record in entry]
     """Analyze a list of subdomains for potential vulnerabilities using service fingerprints and error patterns."""
-    service_fingerprints = load_json_data('/Users/jeet/Library/CloudStorage/OneDrive-Personal/Boston University/2023-2024/Spring/Cybersecurity/SubGuardian/SubDomainTakeover/subguardian/subdomain_check/fingerprints.json')
-    error_patterns = load_error_patterns('/Users/jeet/Library/CloudStorage/OneDrive-Personal/Boston University/2023-2024/Spring/Cybersecurity/SubGuardian/SubDomainTakeover/subguardian/subdomain_check/errors.txt')
+    service_fingerprints = load_json_data('subguardian/subdomain_check/fingerprints.json')
+    error_patterns = load_error_patterns('subguardian/subdomain_check/errors.txt')
     vulnerable_subdomains = {}
     for subdomain in subdomains:
         vulnerability_reason = check_http_response_and_content(subdomain, service_fingerprints, error_patterns)
