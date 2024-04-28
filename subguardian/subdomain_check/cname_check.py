@@ -3,6 +3,8 @@ import requests
 import json
 import re
 
+
+
 def load_json_data(filepath):
     """Load JSON data from a file."""
     # Load data from files
@@ -27,6 +29,9 @@ def load_error_patterns(filepath):
     except Exception as e:
         
         return []
+    
+
+
 
 def check_http_response_and_content(subdomain, service_fingerprints, error_patterns):
     
@@ -67,8 +72,11 @@ def check_http_response_and_content(subdomain, service_fingerprints, error_patte
         print(f"Failed to fetch webpage for {subdomain}: {e}")
     return False
 
-def analyze_subdomains(subdomains, service_fingerprints, error_patterns):
+def cname_check(entry):
+    subdomains = [record['name'] for record in entry]
     """Analyze a list of subdomains for potential vulnerabilities using service fingerprints and error patterns."""
+    service_fingerprints = load_json_data('/Users/jeet/Library/CloudStorage/OneDrive-Personal/Boston University/2023-2024/Spring/Cybersecurity/SubGuardian/SubDomainTakeover/subguardian/subdomain_check/fingerprints.json')
+    error_patterns = load_error_patterns('/Users/jeet/Library/CloudStorage/OneDrive-Personal/Boston University/2023-2024/Spring/Cybersecurity/SubGuardian/SubDomainTakeover/subguardian/subdomain_check/errors.txt')
     vulnerable_subdomains = []
     for subdomain in subdomains:
         if check_http_response_and_content(subdomain, service_fingerprints, error_patterns):
@@ -77,3 +85,12 @@ def analyze_subdomains(subdomains, service_fingerprints, error_patterns):
         else:
             print(f"No vulnerabilities found for {subdomain}.")
     return vulnerable_subdomains
+
+
+# Load data from files
+
+
+# Example usage
+#subdomains_list = ['blog.bucrib.com', 'forms.bucrib.com']
+#vulnerable_subdomains = cname_check(subdomains_list)
+#print("Vulnerable subdomains:", vulnerable_subdomains)
