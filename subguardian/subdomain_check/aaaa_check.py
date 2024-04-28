@@ -59,28 +59,33 @@ def scan_common_ports(ip):
     return open_ports
 
 
-def aname_check(anames):
+def aaaa_check(aaaa_records):
     vulnerable_domains = {}
-    for aname in anames:
+    for aaaa_record in aaaa_records:
 
         # Check web server
-        is_web = check_web_server(aname['address'])
+        is_web = check_web_server(aaaa_record['address'])
 
         # If not web server, further check
         if not is_web:
 
             # Common port scan
-            open_ports = scan_common_ports(aname['address'])
+            open_ports = scan_common_ports(aaaa_record['address'])
             
             if not open_ports:
-                vulnerable_domains[aname['name']] = ["Potentially Vulnerable (No open common ports)"]
+                vulnerable_domains[aaaa_record['name']] = ["Potentially Vulnerable (No open common ports)"]
 
             # Whois check
-            w = check_whois(aname['name'])
+            w = check_whois(aaaa_record['name'])
             
             if not w:
-                vulnerable_domains[aname['name']] = ["Potentially Vulnerable (Whois check failed)"]
+                vulnerable_domains[aaaa_record['name']] = ["Potentially Vulnerable (Whois check failed)"]
 
     # if vulnerable_domains == {}:
     #     return {"NO VULNERABILITY FOUND IN ANAME CHECK"}
     return vulnerable_domains
+
+
+aaaa_record = [{'address': '2606:4700:3036::6815:249', 'domain': 'bucrib.com', 'name': 'bucrib.com', 'type': 'AAAA'}, {'address': '2606:4700:3034::ac43:80e1', 'domain': 'bucrib.com', 'name': 'bucrib.com', 'type': 'AAAA'}, {'address': '2606:4700:3036::6815:249', 'name': 'bucrib.com', 'type': 'AAAA'}, {'address': '2606:4700:3034::ac43:80e1', 'name': 'bucrib.com', 'type': 'AAAA'}]
+
+print(aaaa_check(aaaa_records))

@@ -16,10 +16,10 @@ from .dnsrecon.dnsrecon import check_nxdomain_hijack, dnsrecon, socket_resolv
 from .dnsrecon.lib.dnshelper import DnsHelper
 from .lib.helper import *
 from .subdomain_check.cname_check import cname_check
-from .subdomain_check.aname_check import aname_check
+from .subdomain_check.a_check import a_check
 from .subdomain_check.mx_check import mx_check
 from .subdomain_check.ns_check import ns_check
-#from .subdomain_check.txt_check import txt_check
+from .subdomain_check.txt_check import txt_check
 from .prevention.cloudfare import cloudfare_prevention
 
 
@@ -342,9 +342,8 @@ def main():
 
     cname_vulnerabilities = cname_check(cnames)
     
-
     # Check for vulnerable A records
-    a_vulnerabilities = aname_check(records['A'])
+    a_vulnerabilities = a_check(records['A'])
 
     # Check for vulnerable NS records
     ns_vulnerabilities = ns_check(records['NS'])
@@ -353,17 +352,35 @@ def main():
     mx_vulnerabilities = mx_check(records['MX'])
 
     # Check for vulnerable TXT records
-
-    print("CNAMES", cname_vulnerabilities)
-    print("A RECORDS", a_vulnerabilities)
-    print("NS RECORDS", ns_vulnerabilities)
-    print("MX RECORDS", mx_vulnerabilities)
+    txt_vulnerabilities = txt_check(records['TXT'])
 
 
     
+    print()
+    print("CNAMES", cname_vulnerabilities)
+    print()
+    print("A RECORDS", a_vulnerabilities)
+    print()
+    print("NS RECORDS", ns_vulnerabilities)
+    print()
+    print("MX RECORDS", mx_vulnerabilities)
+    print()
+    print("TXT RECRODS", txt_vulnerabilities)
+    print()
+    print()
+
+
+    print(records['AAAA'])
+    print(records['A'])
+
+
+
     # Delete vulnerable records if possible
     vulnerable_subdomains = []
     if host_types:
         for host in host_types:
             if host == 'cloudfare':
                 cloudfare_prevention(vulnerable_subdomains)
+
+    # Output Results
+

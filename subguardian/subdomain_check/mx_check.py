@@ -1,37 +1,57 @@
 import smtplib
-import ssl
 import whois
 import datetime
+import socket
 
-def check_mx_connect(mx_record):
-    # Attempt to connect to the SMTP server
-    smtp_server = str(mx_record['exchange'])
-    ip = str(mx_record['address'])
-    port = 25
+def check_smtp_connection123(mx_record):
+    exchange = mx_record['exchange']
+    address = mx_record['address']
+
+    result = ()
     try:
-        # Create an SMTP object
-        server = smtplib.SMTP(smtp_server, port)
-        # Setting debug level to 1 to print out the transaction with the server
-        # server.set_debuglevel(1)  
-
-        # Send an EHLO command to the SMTP server to establish the connection and identify the client to the server.
-        server.ehlo()
-
-        # If the server supports TLS
-        if server.has_extn('STARTTLS'):
-            # try secure connection
-            #print("TLS is supported.")
-            server.starttls(context=ssl.create_default_context())
+        # Create an SMTP connection
+        server = smtplib.SMTP(host=exchange, port=25, timeout=10)
+        greeting = server.ehlo()  # Send an EHLO to the server
+        if greeting[0] >= 200 and greeting[0] <= 299:
+            result = (f"Successful SMTP connection to {exchange} at {address}", True)
         else:
-            #print("TLS might not be supported")
-            return "TSL"
-        # Close the connection
+            result = (f"Connection to {exchange} at {address} returned code {greeting[0]}", False)
         server.quit()
-        
-        #print(f"Connection to {smtp_server} with ip {ip} on port {port} was successful.")
-    except Exception as e:
-        return "exception"
-        # print(f"Error connecting to {smtp_server} with ip {ip} on port {port}: {e}")
+        return result
+    except (socket.gaierror, socket.error) as e:
+        return(f"Failed to connect to {exchange} at {address}. Error: {str(e)}", False)
+    except smtplib.SMTPException as e:
+        return(f"Failed, error occurred when connecting to {exchange} at {address}: {str(e)}", False)
+    
+
+def check_smtp_connection(mx_record):
+    exchange = mx_record['exchange']
+    address = mx_record['address']
+    ports = [25, 587, 465]  # SMTP ports to check
+
+    # Track the connection success on any of the ports
+    connection_successful = False
+    error_messages = [f"Failed to connect to {exchange} at {address} on ports:"]
+
+    for port in ports:
+        try:
+            server = smtplib.SMTP(host=exchange, port=port, timeout=10)
+            greeting = server.ehlo()  # Send an EHLO to the server
+            if greeting[0] >= 200 and greeting[0] <= 299:
+                connection_successful = True
+                server.quit()
+                break  # If connection is successful on any port, break out of the loop
+            else:
+                error_messages.append(f"Connection to {exchange} at {address} on port {port} returned code {greeting[0]}")
+            server.quit()
+        except (socket.gaierror, socket.error) as e:
+            error_messages.append(f"{port}. Error: {str(e)}")
+        except smtplib.SMTPException as e:
+            error_messages.append(f"{port}: Error: {str(e)}")
+
+    if not connection_successful:
+        return (" ".join(error_messages), False)
+    return (f"Successful SMTP connection to {exchange} at {address}", True)
 
 
 def check_if_expired(mx_record):
@@ -53,22 +73,29 @@ def check_if_expired(mx_record):
             return False
     except whois.parser.PywhoisError:
         #print(f"WHOIS data not found for MX domain {mx_domain}")
-        return False
+        return None
     
     
 def mx_check(mx_records):
     vulnerability = {}
+    vulnerability_reason = []
 
     for mx_record in mx_records:
-        connect_result = check_mx_connect(mx_record)
-        if connect_result == "TSL":
-            vulnerability[mx_record['exchange']] = "Might Lack of support for STARTTLS encryption."
-        if connect_result == "exception":
-            vulnerability[mx_record['exchange']] = "SMTP server might reject the connection, possibly due to security settings"
+        connect_result = check_smtp_connection(mx_record)
+
+        if not connect_result[1]:
+            vulnerability_reason.append(connect_result[0])
+
 
         # Check for expired domain for current NS record
         expired = check_if_expired(mx_record)
-        if expired:
-            vulnerability[mx_record['exchange']] = 'expired'
-            
+        if expired == True:
+            vulnerability_reason.append('MX record expired')
+        elif expired == None:
+            vulnerability_reason.append('WHOIS data not found')
+        
+
+        if vulnerability_reason:
+            vulnerability[mx_record['exchange']] = vulnerability_reason
+    
     return vulnerability
