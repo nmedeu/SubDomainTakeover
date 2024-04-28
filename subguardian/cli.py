@@ -310,6 +310,13 @@ def main():
 
     print(cname_vulnerabilities)
 
+    print("THE MX NAME RECORD IS")
+    print("/n /n /n")
+    print(records['sublist3r'])
+    print("/n /n /n")
+    print("END OF RECORDS")
+
+
     
 
     #delete_dns_records(cname_vulnerabilities)

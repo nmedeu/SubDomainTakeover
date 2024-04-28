@@ -1,8 +1,10 @@
 import smtplib
 import ssl
-import whois
+import whois.whoisParser  # Correct import
 import datetime
 import dns.resolver
+
+
 
 
 def check_mx_records(domain):
@@ -99,3 +101,5 @@ def mx_check(mx_records):
             vulnerability[mx_record['exchange']] = 'expired'
             
     return vulnerability
+
+print(mx_check([{'address': '2606:4700:90:0:c1f8:f874:2386:b61f', 'domain': 'bucrib.com', 'exchange': 'mx1.hostinger.com', 'type': 'MX'}, {'address': '2606:4700:90:0:c1f8:f874:2386:b61f', 'domain': 'bucrib.com', 'exchange': 'mx2.hostinger.com', 'type': 'MX'}, {'address': '172.65.182.103', 'domain': 'bucrib.com', 'exchange': 'mx1.hostinger.com', 'type': 'MX'}, {'address': '172.65.182.103', 'domain': 'bucrib.com', 'exchange': 'mx2.hostinger.com', 'type': 'MX'}]))

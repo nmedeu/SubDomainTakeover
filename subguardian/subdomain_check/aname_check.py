@@ -15,14 +15,10 @@ def check_whois(ip):
         print(f"Error retrieving Whois for {ip}: {e}")
         return False
     
-# def is_relevant_check(domain, w):
-#     """ Check if the A record IP is relevant (currently only returning the org name for user validation) """
-#     return w['org']
-
 
 def check_web_server(ip):
     """Check if a web server responds at each IP address."""
-    for i, protocol in enumerate(['http://', 'https://']):
+    for protocol in ['http://', 'https://']:
         url = f"{protocol}{ip}"
         try:
             response = requests.get(url, timeout=5)
@@ -64,42 +60,35 @@ def scan_common_ports(ip):
 
 
 def aname_check(anames):
-    vulnerable = []
+    vulnerable_domains = {}
     for aname in anames:
 
-        # Check webserver
+        # Check web server
         is_web = check_web_server(aname['address'])
 
-        # If not webserver furhter check
+        # If not web server, further check
         if not is_web:
 
-            # CommonPort Scan
+            # Common port scan
             open_ports = scan_common_ports(aname['address'])
             
             if not open_ports:
-                vulnerable.append({aname['name']: "Potentially Vulnerable"})
+                vulnerable_domains[aname['name']] = ["Potentially Vulnerable (No open common ports)"]
 
-            # WhoIs check
+            # Whois check
             w = check_whois(aname['name'])
             
             if not w:
-                vulnerable.append({aname['name']: "Potentially Vulnerable"})
+                vulnerable_domains[aname['name']] = ["Potentially Vulnerable (Whois check failed)"]
+
+    if vulnerable_domains == {}:
+        return {"NO VULNERABILITY FOUND IN ANAME CHECK"}
+    return vulnerable_domains
 
 
-            # Check relevancy of aname ip ???
-            # try:
-            #     is_relevant = is_relevant_check(aname['name'], w)
-            #     if not is_relevant:
-            #         vulnerable.append({aname['name']: "Vulnerable"})
-            # except Exception as e:
-            #     print(f"WhoIs failed with error {e}")
-            #     print(aname)
-            #     vulnerable.append({aname['name']: "Potentially Vulnerable"})
-
-    return vulnerable
-
-
-
-
-
-
+print(aname_check([
+    {'address': '104.21.2.73', 'domain': 'bucrib.com', 'name': 'bucrib.com', 'type': 'A'},
+    {'address': '172.67.128.225', 'domain': 'bucrib.com', 'name': 'bucrib.com', 'type': 'A'},
+    {'address': '172.67.128.225', 'name': 'bucrib.com', 'type': 'A'},
+    {'address': '104.21.2.73', 'name': 'bucrib.com', 'type': 'A'}
+]))

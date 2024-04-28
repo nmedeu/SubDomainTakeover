@@ -42,7 +42,7 @@ def check_http_response_and_content(subdomain, service_fingerprints, error_patte
         for rdata in answers:
             cname = str(rdata.target)
             
-
+        vulnerability_reason = []
         # Check each service for a matching CNAME pattern and fingerprint
         for service in service_fingerprints:
             for pattern in service['cname']:
@@ -50,35 +50,45 @@ def check_http_response_and_content(subdomain, service_fingerprints, error_patte
                     
                     if service['fingerprint'].lower() in page_content:
                         print(f"Fingerprint '{service['fingerprint']}' found for service '{service['service']}' in response for {subdomain}.")
-                        return True
+                        vulnerability_reason.append(f"Fingerprint '{service['fingerprint']}' found for service '{service['service']}'")
+                        
 
         # Check for error patterns regardless of service fingerprint
         for error in error_patterns:
             if error.lower() in page_content:
+                vulnerability_reason.append(f"Error pattern '{error}' found")
                 
-                return True
 
         # Check specific HTTP status codes for general vulnerability indications
         if response.status_code in [404, 410]:
             print(f"HTTP {response.status_code} found, indicating a possible takeover opportunity for {subdomain}.")
-            return True
+            vulnerability_reason.append(f"HTTP {response.status_code} found, indicating a possible takeover opportunity")
+            
         elif response.status_code == 403:
+            vulnerability_reason.append(f"HTTP 403 found, indicating possible misconfiguration")
             print(f"{subdomain} returned HTTP 403, indicating possible misconfiguration.")
 
+    
+
+        if vulnerability_reason:
+            return {subdomain: vulnerability_reason}
+        else:
+            return None
     except requests.RequestException as e:
         print(f"Failed to fetch webpage for {subdomain}: {e}")
-    return False
+    
 
 def cname_check(entry):
     subdomains = [record['name'] for record in entry]
     """Analyze a list of subdomains for potential vulnerabilities using service fingerprints and error patterns."""
     service_fingerprints = load_json_data('/Users/jeet/Library/CloudStorage/OneDrive-Personal/Boston University/2023-2024/Spring/Cybersecurity/SubGuardian/SubDomainTakeover/subguardian/subdomain_check/fingerprints.json')
     error_patterns = load_error_patterns('/Users/jeet/Library/CloudStorage/OneDrive-Personal/Boston University/2023-2024/Spring/Cybersecurity/SubGuardian/SubDomainTakeover/subguardian/subdomain_check/errors.txt')
-    vulnerable_subdomains = []
+    vulnerable_subdomains = {}
     for subdomain in subdomains:
-        if check_http_response_and_content(subdomain, service_fingerprints, error_patterns):
-            vulnerable_subdomains.append(subdomain)
-            print(f"Vulnerability confirmed for {subdomain}.")
+        vulnerability_reason = check_http_response_and_content(subdomain, service_fingerprints, error_patterns)
+        if vulnerability_reason:
+            vulnerable_subdomains.update(vulnerability_reason)
+            print(f"Vulnerability confirmed for {subdomain}: {vulnerability_reason}")
         else:
             print(f"No vulnerabilities found for {subdomain}.")
     return vulnerable_subdomains
@@ -87,7 +97,7 @@ def cname_check(entry):
 # Load data from files
 
 
-# Example usage
-#subdomains_list = ['blog.bucrib.com', 'forms.bucrib.com']
-#vulnerable_subdomains = cname_check(subdomains_list)
-#print("Vulnerable subdomains:", vulnerable_subdomains)
+
+
+vulnerable_subdomains = cname_check([{'name': 'www.bucrib.com', 'type': 'subdomain'}, {'name': 'blog.bucrib.com', 'type': 'subdomain'}, {'name': 'forms.bucrib.com', 'type': 'subdomain'}])
+print("Vulnerable subdomains:", vulnerable_subdomains)
