@@ -1,39 +1,7 @@
 import smtplib
 import ssl
-import whois.whoisParser  # Correct import
+import whois
 import datetime
-import dns.resolver
-
-
-
-
-def check_mx_records(domain):
-    try:
-        # Fetch MX records for the specified domain
-        mx_records = dns.resolver.resolve(domain, 'MX')
-        if not mx_records:
-            return f"No MX records found for domain: {domain}"
-        
-        results = []
-        # Check each MX record
-        for record in mx_records:
-            mx_host = str(record.exchange).strip('.')
-            try:
-                # Try to resolve the MX host to an IP address
-                dns.resolver.resolve(mx_host, 'A')
-                results.append(f"MX host resolved: {mx_host}")
-            except dns.resolver.NoAnswer:
-                results.append(f"MX host not resolved: {mx_host}")
-            except Exception as e:
-                results.append(f"Error resolving MX host {mx_host}: {str(e)}")
-
-        return results
-
-    except dns.resolver.NoAnswer:
-        return f"No MX records found for domain: {domain}"
-    except Exception as e:
-        return f"Error checking MX records for domain {domain}: {str(e)}"
-
 
 def check_mx_connect(mx_record):
     # Attempt to connect to the SMTP server
@@ -62,7 +30,8 @@ def check_mx_connect(mx_record):
         
         print(f"Connection to {smtp_server} with ip {ip} on port {port} was successful.")
     except Exception as e:
-        print(f"Error connecting to {smtp_server} with ip {ip} on port {port}: {e}")
+        return "exception"
+        # print(f"Error connecting to {smtp_server} with ip {ip} on port {port}: {e}")
 
 
 def check_if_expired(mx_record):
@@ -94,6 +63,8 @@ def mx_check(mx_records):
         connect_result = check_mx_connect(mx_record)
         if connect_result == "TSL":
             vulnerability[mx_record['exchange']] = "Might Lack of support for STARTTLS encryption."
+        if connect_result == "exception":
+            vulnerability[mx_record['exchange']] = "SMTP server might reject the connection, possibly due to security settings"
 
         # Check for expired domain for current NS record
         expired = check_if_expired(mx_record)
@@ -101,5 +72,3 @@ def mx_check(mx_records):
             vulnerability[mx_record['exchange']] = 'expired'
             
     return vulnerability
-
-print(mx_check([{'address': '2606:4700:90:0:c1f8:f874:2386:b61f', 'domain': 'bucrib.com', 'exchange': 'mx1.hostinger.com', 'type': 'MX'}, {'address': '2606:4700:90:0:c1f8:f874:2386:b61f', 'domain': 'bucrib.com', 'exchange': 'mx2.hostinger.com', 'type': 'MX'}, {'address': '172.65.182.103', 'domain': 'bucrib.com', 'exchange': 'mx1.hostinger.com', 'type': 'MX'}, {'address': '172.65.182.103', 'domain': 'bucrib.com', 'exchange': 'mx2.hostinger.com', 'type': 'MX'}]))
