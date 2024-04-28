@@ -1,84 +1,91 @@
-
-
 {
     "AWS S3 Bucket": [
-        ".*s3-website[.-].*\\.amazonaws\\.com.*",
-        ".*s3\\.amazonaws\\.com.*"
+        ".*s3-website[-.](?:eu|us|ap|ca|sa)-(?:central|east|west|north|south)[1-3]?.amazonaws.com",
+        ".*s3\\.amazonaws\\.com\\/.*"
     ],
     "Azure Blob": [
-        ".*blob\\.core\\.windows\\.net.*"
+        ".*blob.core.windows.net\\/.*"
     ],
     "Heroku": [
-        ".*herokudns\\.com.*",
-        ".*herokuapp\\.com.*"
+        ".*\\.herokudns.com",
+        ".*\\.herokuapp.com"
     ],
     "Google Cloud Storage": [
-        ".*storage\\.googleapis\\.com.*"
+        ".*storage.googleapis.com\\/.*"
     ],
     "GitHub Pages": [
-        ".*github\\.io.*"
+        ".*\\.github.io"
     ],
     "Shopify": [
-        ".*myshopify\\.com.*"
+        ".*\\.myshopify.com"
     ],
     "Ghost": [
-        ".*ghost\\.io.*"
+        ".*\\.ghost.io"
     ],
     "WordPress": [
-        ".*wordpress\\.com.*"
+        ".*\\.wordpress.com"
     ],
     "Squarespace": [
-        ".*squarespace\\.com.*"
+        ".*\\.squarespace.com"
     ],
     "Wix": [
-        ".*wixsite\\.com.*"
+        ".*\\.wixsite.com"
     ],
     "Pantheon": [
-        ".*pantheonsite\\.io.*"
+        ".*\\.pantheonsite.io"
     ],
-    "Tumbler": [
-        ".*tumblr\\.com.*"
+    "Tumblr": [
+        ".*\\.tumblr.com"
     ],
     "Cargo Collective": [
-        ".*cargocollective\\.com.*"
+        ".*\\.cargocollective.com"
     ],
     "Bitbucket": [
-        ".*bitbucket\\.io.*"
+        ".*\\.bitbucket.io"
     ],
     "Unbounce Pages": [
-        ".*unbouncepages\\.com.*"
+        ".*\\.unbouncepages.com"
     ],
     "Desk": [
-        ".*desk\\.com.*"
+        ".*\\.desk.com"
     ],
     "Zendesk": [
-        ".*zendesk\\.com.*"
+        ".*\\.zendesk.com"
     ],
     "Fastly": [
-        ".*fastly\\.net.*"
+        ".*global.ssl.fastly.net"
     ],
     "Help Juice": [
-        ".*helpjuice\\.com.*"
+        ".*\\.helpjuice.com"
     ],
     "Help Scout": [
-        ".*helpscoutdocs\\.com.*"
+        ".*\\.helpscoutdocs.com"
     ],
     "Cargo": [
-        ".*cargo\\.site.*"
+        ".*\\.cargo.site"
     ],
     "Feedpress": [
-        ".*redirect\\.feedpress\\.me.*"
+        ".*redirect.feedpress.me"
     ],
     "Surge.sh": [
-        ".*surge\\.sh.*"
+        ".*\\.surge.sh"
     ],
     "Webflow": [
-        ".*webflow\\.io.*"
+        ".*\\.webflow.io"
     ],
     "Kinsta": [
-        ".*kinsta\\.cloud.*"
+        ".*\\.kinsta.cloud"
     ],
     "LaunchRock": [
-        ".*launchrock\\.com.*"
+        ".*\\.launchrock.com"
+    ],
+    "Digital Ocean Spaces": [
+        ".*\\.digitaloceanspaces.com"
+    ],
+    "API Keys and Tokens": [
+        "(?:api_key|access_token|client_id)=([a-f0-9]{32,64})"
+    ],
+    "Misconfigured DNS Entries": [
+        "(?:cname|ns)=(?:.*\\.)?(?:com|net|org|io|co)"
     ]
 }
