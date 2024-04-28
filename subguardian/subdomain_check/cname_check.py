@@ -2,7 +2,7 @@ import dns.resolver
 import requests
 import json
 import re
-
+import os
 
 
 def load_json_data(filepath):
@@ -31,8 +31,6 @@ def load_error_patterns(filepath):
         return []
     
 
-
-
 def check_http_response_and_content(subdomain, service_fingerprints, error_patterns):
     
     try:
@@ -60,7 +58,6 @@ def check_http_response_and_content(subdomain, service_fingerprints, error_patte
         for error in error_patterns:
             if error.lower() in page_content:
                 vulnerability_reason.append(f"Error pattern '{error}' found")
-                
 
         # Check specific HTTP status codes for general vulnerability indications
         if response.status_code in [404, 410]:
@@ -70,8 +67,6 @@ def check_http_response_and_content(subdomain, service_fingerprints, error_patte
         elif response.status_code == 403:
             vulnerability_reason.append(f"HTTP 403 found, indicating possible misconfiguration")
             print(f"{subdomain} returned HTTP 403, indicating possible misconfiguration.")
-
-    
 
         if vulnerability_reason:
             return {subdomain: vulnerability_reason}
@@ -98,8 +93,6 @@ def cname_check(entry):
 
 
 # Load data from files
-
-
 
 
 vulnerable_subdomains = cname_check([{'name': 'www.bucrib.com', 'type': 'subdomain'}, {'name': 'blog.bucrib.com', 'type': 'subdomain'}, {'name': 'forms.bucrib.com', 'type': 'subdomain'}])
