@@ -308,7 +308,9 @@ def main():
     for key, value in records.items() :
         print (key)
 
+    print(records)
     cname_vulnerabilities = cname_check(records['sublist3r'])
+
 
     # print(cname_vulnerabilities)
 
