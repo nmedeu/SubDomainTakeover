@@ -7,6 +7,9 @@ import re
 
 def load_json_data(filepath):
     """Load JSON data from a file."""
+    # Load data from files
+    service_fingerprints = load_json_data('/Users/jeet/Library/CloudStorage/OneDrive-Personal/Boston University/2023-2024/Spring/Cybersecurity/SubGuardian/SubDomainTakeover/subguardian/subdomain_check/fingerprints.json')
+    error_patterns = load_error_patterns('/Users/jeet/Library/CloudStorage/OneDrive-Personal/Boston University/2023-2024/Spring/Cybersecurity/SubGuardian/SubDomainTakeover/subguardian/subdomain_check/errors.txt')
     try:
         with open(filepath, 'r') as f:
             data = json.load(f)

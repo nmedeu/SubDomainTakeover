@@ -1,14 +1,17 @@
 import requests
 import logging
 import dns.resolver
+import os
+from dotenv import load_dotenv
 
-# Initialize the logging
-logging.basicConfig(level=logging.INFO, format='%(asctime)s - %(levelname)s - %(message)s')
+load_dotenv()
 
 # Cloudflare API credentials and configurations
-CLOUDFLARE_EMAIL = 'centraldeveloper13@gmail.com'
-CLOUDFLARE_API_KEY = '4761d16c2fd5d394c6089414b6509e3e7a5e2'
-CLOUDFLARE_ZONE_ID = '619807a78c04c7e36945a10b65d28d76'
+
+CLOUDFLARE_EMAIL = os.getenv('CLOUDFLARE_EMAIL')
+CLOUDFLARE_API_KEY = os.getenv('CLOUDFLARE_API_KEY')
+CLOUDFLARE_ZONE_ID = os.getenv('CLOUDFLARE_ZONE_ID')
+    
 
 headers = {
     "X-Auth-Email": CLOUDFLARE_EMAIL,
@@ -46,7 +49,7 @@ def find_id(subdomain):
     return None
 
 
-def delete_dns_records(subdomains):
+def cloudfare_prevention(subdomains):
     """
     Delete DNS record for the subdomain using Cloudflare API.
     """

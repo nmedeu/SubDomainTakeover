@@ -4,3 +4,4 @@
 *.pyo
 venv/
 *.pytest_cache/
+.env
