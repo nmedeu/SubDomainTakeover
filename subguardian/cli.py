@@ -305,10 +305,12 @@ def main():
 
 
     sublist3r_records = records['sublist3r']
-    domain_names = [record['name'] for record in sublist3r_records]
-    cname_vulnerabilities = cname_check(domain_names)
+
+    cname_vulnerabilities = cname_check(sublist3r_records)
 
     print(cname_vulnerabilities)
+
+    
 
     #delete_dns_records(cname_vulnerabilities)
 
