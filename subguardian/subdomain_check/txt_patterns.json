@@ -87,5 +87,12 @@
     ],
     "Misconfigured DNS Entries": [
         "(?:cname|ns)=(?:.*\\.)?(?:com|net|org|io|co)"
-    ]
+    ],
+    "Permissive SPF": [
+        "v=spf1 .*\\+all",
+        "v=spf1 .*\\?all"
+    ],
+    "Non-restrictive DMARC": [
+        "v=DMARC1; p=none"
+    ]    
 }

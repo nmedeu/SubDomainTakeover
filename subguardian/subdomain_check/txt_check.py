@@ -27,11 +27,17 @@ def txt_check(txt_records):
     """Check TXT records of a subdomain for potential takeover vulnerabilities."""
     txt_patterns = load_txt_patterns()
     vulnerabilities = {}
-
+    
     for record in txt_records:
         for service, patterns in txt_patterns.items():
+            print("SERVICE IS " + service)
+            print("PATTERNS ARE " + str(patterns))  # Ensure patterns is converted to string
+            
             for pattern in patterns:
-                if re.search(pattern, record['strings']):
+                print("PATTERN IS " + pattern)
+                print("THE RECORD[strings] IS " + record['strings'])  # This is fine if record['strings'] is always a string
+                if re.search(pattern.replace('.', r'\.').replace('*', r'.*'), record['strings']):
+                    print("SOME PATTERN MATCH")
                     reason = f"Matched {service} pattern '{pattern}' indicating possible vulnerability."
                     if record['name'] in vulnerabilities:
                         vulnerabilities[record['name']].append(reason)
@@ -39,3 +45,6 @@ def txt_check(txt_records):
                         vulnerabilities[record['name']] = [reason]
                     logging.warning(f"[VULNERABLE] {record['name']} might be vulnerable due to TXT record: {record}")
     return vulnerabilities
+
+print("Vulnerable result for txt here")
+print(txt_check([{'domain': 'bucrib.com', 'name': '_dmarc.bucrib.com', 'strings': 'v=DMARC1; p=none', 'type': 'TXT'}, {'domain': 'bucrib.com', 'name': 'bucrib.com', 'strings': 'v=spf1 include:_spf.mail.hostinger.com ~all', 'type': 'TXT'}]))

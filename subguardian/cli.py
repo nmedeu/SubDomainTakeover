@@ -373,6 +373,9 @@ def main():
     print(records['AAAA'])
     print(records['A'])
 
+    print("TXT RECORDS START HERE")
+    print("/n")
+    print(records['TXT'])
 
 
     # Delete vulnerable records if possible

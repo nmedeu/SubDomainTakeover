@@ -57,7 +57,7 @@ def check_http_response_and_content(subdomain, service_fingerprints, error_patte
         for error in error_patterns:
             if error.lower() in page_content:
                 vulnerability_reason.append(f"Error pattern '{error}' found")
-
+# 
         # Check specific HTTP status codes for general vulnerability indications
         if response.status_code in [404, 410]:
             #print(f"HTTP {response.status_code} found, indicating a possible takeover opportunity for {subdomain}.")

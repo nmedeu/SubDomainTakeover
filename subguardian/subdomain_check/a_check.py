@@ -90,5 +90,3 @@ def a_check(a_record):
     return vulnerabilities
 
 
-a_record = [{'address': '172.67.128.225', 'name': 'bucrib.com', 'type': 'A'}, {'address': '104.21.2.73', 'name': 'bucrib.com', 'type': 'A'}, {'address': '104.21.2.73', 'domain': 'bucrib.com', 'name': 'bucrib.com', 'type': 'A'}, {'address': '172.67.128.225', 'domain': 'bucrib.com', 'name': 'bucrib.com', 'type': 'A'}]
-print(a_check(a_record))
