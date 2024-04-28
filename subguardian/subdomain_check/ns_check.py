@@ -21,22 +21,22 @@ def check_if_orphaned(ns_record):
         try:
             # Check for A record (IPv4)
             dns.resolver.resolve(ns_domain, 'A')
-            print(f"IPv4 address found for Name Server {ns_domain}")
+            #print(f"IPv4 address found for Name Server {ns_domain}")
             return False, address_type
         except dns.resolver.NoAnswer:
-            print(f"No IPv4 address found for Name Server {ns_domain}")
+            #print(f"No IPv4 address found for Name Server {ns_domain}")
             return True, address_type
     elif (address_type == 'IPv6'):
         try:
             # Check for AAAA record (IPv6)
             dns.resolver.resolve(ns_domain, 'AAAA')
-            print(f"IPv6 address found for Name Server {ns_domain}")
+            #print(f"IPv6 address found for Name Server {ns_domain}")
             return False, address_type
         except dns.resolver.NoAnswer:
-            print(f"No IPv6 address found for Name Server {ns_domain}")
+            #print(f"No IPv6 address found for Name Server {ns_domain}")
             return True, address_type
     else:
-        print(address_type)
+        #print(address_type)
         return False, address_type
 
 
@@ -52,13 +52,13 @@ def check_if_expired(ns_record):
             expiration_date = ns_whois.expiration_date
 
         if expiration_date and expiration_date < datetime.datetime.now():
-            print(f"NS domain {ns_domain} is expired")
+            #print(f"NS domain {ns_domain} is expired")
             return True
         else:
-            print(f"NS domain {ns_domain} has not expired")
+            #print(f"NS domain {ns_domain} has not expired")
             return False
     except whois.parser.PywhoisError:
-        print(f"WHOIS data not found for NS domain {ns_domain}")
+        #print(f"WHOIS data not found for NS domain {ns_domain}")
         return False
 
 
@@ -73,10 +73,10 @@ def check_ns_status(ns_record):
     try:
         response = resolver.resolve(domain)
         if response:
-            print(f"NS domain {ns_target} is up and responding.")
+            #print(f"NS domain {ns_target} is up and responding.")
             return False, ip, address_type
     except Exception as e:
-        print(f"NS domain {ns_target} is not responding or may be down.")
+        #print(f"NS domain {ns_target} is not responding or may be down.")
         return True, ip, address_type
 
 
@@ -84,7 +84,7 @@ def ns_check(ns_records):
     vulnerability = {}
     
     for ns_record in ns_records:
-        print("ns_record now checking is: ", ns_record)
+        #print("ns_record now checking is: ", ns_record)
 
         # Check for orphaned DNS records
         orphaned, ip_type = check_if_orphaned(ns_record)

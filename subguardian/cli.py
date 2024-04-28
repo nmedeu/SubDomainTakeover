@@ -15,10 +15,13 @@ from .subdomain_enum.sublist3r import sublist3r
 from .dnsrecon.dnsrecon import check_nxdomain_hijack, dnsrecon, socket_resolv
 from .dnsrecon.lib.dnshelper import DnsHelper
 from .lib.helper import *
-#from .subdomain_check.cname_check import cname_check
+from .subdomain_check.cname_check import cname_check
 from .subdomain_check.aname_check import aname_check
+from .subdomain_check.mx_check import mx_check
 from .subdomain_check.ns_check import ns_check
+#from .subdomain_check.txt_check import txt_check
 from .prevention.cloudfare import cloudfare_prevention
+
 
 
 CONFIG = {'disable_check_recursion': False, 'disable_check_bindversion': False}
@@ -200,8 +203,8 @@ def main():
 
 
     prevent_hosts = args.prevent_hosts
+    host_types = []
     if prevent_hosts:
-        types = []
         if prevent_hosts:
             prevent_hosts = prevent_hosts.lower().strip()
 
@@ -223,10 +226,10 @@ def main():
                 parser_error(f'This type of scan is not in the list: {incorrect_types_str}')
                 sys.exit(1)
 
-            types = list(set(prevent_hosts.split(',')))
+            host_types = list(set(prevent_hosts.split(',')))
 
     load_dotenv()
-    for host in types:
+    for host in host_types:
         if host == "cloudfare":
             required_vars = ["CLOUDFLARE_EMAIL", "CLOUDFLARE_API_KEY", "CLOUDFLARE_ZONE_ID"]
             # Check each variable
@@ -329,8 +332,6 @@ def main():
     records = unique_records(records)
     records = add_sublist3r_if_cname_absent(records, subdomains)
 
-    print(records)
-
 
     # Check for vulnerable CNAME records
     cnames = []
@@ -339,56 +340,30 @@ def main():
     if 'sublist3r' in records:
         cnames.extend(records['sublist3r'])
 
-    #cname_vulnerabilities = cname_check(cnames)
+    cname_vulnerabilities = cname_check(cnames)
+    
 
     # Check for vulnerable A records
-    #a_vulnerabilities = aname_check(records['A'])
+    a_vulnerabilities = aname_check(records['A'])
 
+    # Check for vulnerable NS records
+    ns_vulnerabilities = ns_check(records['NS'])
 
+    # Check for vulnerable MX records
+    mx_vulnerabilities = mx_check(records['MX'])
 
+    # Check for vulnerable TXT records
 
+    print("CNAMES", cname_vulnerabilities)
+    print("A RECORDS", a_vulnerabilities)
+    print("NS RECORDS", ns_vulnerabilities)
+    print("MX RECORDS", mx_vulnerabilities)
 
 
     
     # Delete vulnerable records if possible
     vulnerable_subdomains = []
-    if types:
-        for host in types:
+    if host_types:
+        for host in host_types:
             if host == 'cloudfare':
                 cloudfare_prevention(vulnerable_subdomains)
-    # Jeetcreates.com
-    #records = {'A': [{'address': '185.230.63.171', 'name': 'jeetcreates.com', 'type': 'A'}, {'address': '185.230.63.171', 'domain': 'jeetcreates.com', 'name': 'jeetcreates.com', 'type': 'A'}, {'address': '185.230.63.107', 'name': 'jeetcreates.com', 'type': 'A'}, {'address': '185.230.63.186', 'domain': 'jeetcreates.com', 'name': 'jeetcreates.com', 'type': 'A'}, {'address': '185.230.63.107', 'domain': 'jeetcreates.com', 'name': 'jeetcreates.com', 'type': 'A'}, {'address': '185.230.63.186', 'name': 'jeetcreates.com', 'type': 'A'}], 'NS': [{'Version': '', 'address': '216.239.38.100', 'domain': 'jeetcreates.com', 'recursive': 'True', 'target': 'ns3.wixdns.net', 'type': 'NS'}, {'Version': '', 'address': '216.239.36.100', 'domain': 'jeetcreates.com', 'recursive': 'True', 'target': 'ns2.wixdns.net', 'type': 'NS'}], 'SOA': [{'address': '216.239.36.100', 'domain': 'jeetcreates.com', 'mname': 'ns2.wixdns.net', 'type': 'SOA'}], 'sublist3r': [{'name': 'www.jeetcreates.com', 'type': 'subdomain'}]}
-    
-    # Check CNAME vulnearbilities
-
-    # print(type(records['sublist3r']))
-
-    # print(cname_check(records['sublist3r']))
-
-
-    # Check NS vulnerabilities
-
-    # print(records['sublist3r'][0]['name'])
-    # print("NS records are: ", records['NS'])s
-    # print(ns_check(records['NS']))
-
-
-    sublist3r_records = records['sublist3r']
-
-    cname_vulnerabilities = cname_check(sublist3r_records)
-
-    print(cname_vulnerabilities)
-
-    print("THE MX NAME RECORD IS")
-    print("/n /n /n")
-    print(records['sublist3r'])
-    print("/n /n /n")
-    print("END OF RECORDS")
-
-
-    
-
-    #delete_dns_records(cname_vulnerabilities)
-
-
-    

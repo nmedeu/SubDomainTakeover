@@ -35,7 +35,7 @@ def fetch_txt_records(subdomain):
     return records
 
 
-def check_for_vulnerabilities(subdomain):
+def txt_check(subdomain):
     """Check TXT records of a subdomain for potential takeover vulnerabilities."""
     txt_records = fetch_txt_records(subdomain)
     vulnerable_records = []

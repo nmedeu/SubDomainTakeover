@@ -1,39 +1,7 @@
 import smtplib
 import ssl
-import whois.whoisParser  # Correct import
+import whois
 import datetime
-import dns.resolver
-
-
-
-
-def check_mx_records(domain):
-    try:
-        # Fetch MX records for the specified domain
-        mx_records = dns.resolver.resolve(domain, 'MX')
-        if not mx_records:
-            return f"No MX records found for domain: {domain}"
-        
-        results = []
-        # Check each MX record
-        for record in mx_records:
-            mx_host = str(record.exchange).strip('.')
-            try:
-                # Try to resolve the MX host to an IP address
-                dns.resolver.resolve(mx_host, 'A')
-                results.append(f"MX host resolved: {mx_host}")
-            except dns.resolver.NoAnswer:
-                results.append(f"MX host not resolved: {mx_host}")
-            except Exception as e:
-                results.append(f"Error resolving MX host {mx_host}: {str(e)}")
-
-        return results
-
-    except dns.resolver.NoAnswer:
-        return f"No MX records found for domain: {domain}"
-    except Exception as e:
-        return f"Error checking MX records for domain {domain}: {str(e)}"
-
 
 def check_mx_connect(mx_record):
     # Attempt to connect to the SMTP server
@@ -52,15 +20,15 @@ def check_mx_connect(mx_record):
         # If the server supports TLS
         if server.has_extn('STARTTLS'):
             # try secure connection
-            print("TLS is supported.")
+            #print("TLS is supported.")
             server.starttls(context=ssl.create_default_context())
         else:
-            print("TLS might not be supported")
+            #print("TLS might not be supported")
             return "TSL"
         # Close the connection
         server.quit()
         
-        print(f"Connection to {smtp_server} with ip {ip} on port {port} was successful.")
+        #print(f"Connection to {smtp_server} with ip {ip} on port {port} was successful.")
     except Exception as e:
         print(f"Error connecting to {smtp_server} with ip {ip} on port {port}: {e}")
 
@@ -77,13 +45,13 @@ def check_if_expired(mx_record):
             expiration_date = mx_whois.expiration_date
 
         if expiration_date and expiration_date < datetime.datetime.now():
-            print(f"MX domain {mx_domain} is expired")
+            #print(f"MX domain {mx_domain} is expired")
             return True
         else:
-            print(f"MX domain {mx_domain} has not expired")
+            #print(f"MX domain {mx_domain} has not expired")
             return False
     except whois.parser.PywhoisError:
-        print(f"WHOIS data not found for MX domain {mx_domain}")
+        #print(f"WHOIS data not found for MX domain {mx_domain}")
         return False
     
     
@@ -101,5 +69,3 @@ def mx_check(mx_records):
             vulnerability[mx_record['exchange']] = 'expired'
             
     return vulnerability
-
-print(mx_check([{'address': '2606:4700:90:0:c1f8:f874:2386:b61f', 'domain': 'bucrib.com', 'exchange': 'mx1.hostinger.com', 'type': 'MX'}, {'address': '2606:4700:90:0:c1f8:f874:2386:b61f', 'domain': 'bucrib.com', 'exchange': 'mx2.hostinger.com', 'type': 'MX'}, {'address': '172.65.182.103', 'domain': 'bucrib.com', 'exchange': 'mx1.hostinger.com', 'type': 'MX'}, {'address': '172.65.182.103', 'domain': 'bucrib.com', 'exchange': 'mx2.hostinger.com', 'type': 'MX'}]))

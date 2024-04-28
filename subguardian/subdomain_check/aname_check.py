@@ -22,7 +22,7 @@ def check_web_server(ip):
         url = f"{protocol}{ip}"
         try:
             response = requests.get(url, timeout=5)
-            print(f"Response from {url}: {response.status_code}")
+            #print(f"Response from {url}: {response.status_code}")
             return True
         except requests.ConnectionError:
             print(f"Failed to connect to {url}")
@@ -81,14 +81,6 @@ def aname_check(anames):
             if not w:
                 vulnerable_domains[aname['name']] = ["Potentially Vulnerable (Whois check failed)"]
 
-    if vulnerable_domains == {}:
-        return {"NO VULNERABILITY FOUND IN ANAME CHECK"}
+    # if vulnerable_domains == {}:
+    #     return {"NO VULNERABILITY FOUND IN ANAME CHECK"}
     return vulnerable_domains
-
-
-print(aname_check([
-    {'address': '104.21.2.73', 'domain': 'bucrib.com', 'name': 'bucrib.com', 'type': 'A'},
-    {'address': '172.67.128.225', 'domain': 'bucrib.com', 'name': 'bucrib.com', 'type': 'A'},
-    {'address': '172.67.128.225', 'name': 'bucrib.com', 'type': 'A'},
-    {'address': '104.21.2.73', 'name': 'bucrib.com', 'type': 'A'}
-]))

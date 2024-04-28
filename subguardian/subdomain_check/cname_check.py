@@ -49,7 +49,7 @@ def check_http_response_and_content(subdomain, service_fingerprints, error_patte
                 if re.search(pattern.replace('.', r'\.').replace('*', r'.*'), cname):
                     
                     if service['fingerprint'].lower() in page_content:
-                        print(f"Fingerprint '{service['fingerprint']}' found for service '{service['service']}' in response for {subdomain}.")
+                        #print(f"Fingerprint '{service['fingerprint']}' found for service '{service['service']}' in response for {subdomain}.")
                         vulnerability_reason.append(f"Fingerprint '{service['fingerprint']}' found for service '{service['service']}'")
                         
 
@@ -60,12 +60,12 @@ def check_http_response_and_content(subdomain, service_fingerprints, error_patte
 
         # Check specific HTTP status codes for general vulnerability indications
         if response.status_code in [404, 410]:
-            print(f"HTTP {response.status_code} found, indicating a possible takeover opportunity for {subdomain}.")
+            #print(f"HTTP {response.status_code} found, indicating a possible takeover opportunity for {subdomain}.")
             vulnerability_reason.append(f"HTTP {response.status_code} found, indicating a possible takeover opportunity")
             
         elif response.status_code == 403:
             vulnerability_reason.append(f"HTTP 403 found, indicating possible misconfiguration")
-            print(f"{subdomain} returned HTTP 403, indicating possible misconfiguration.")
+            #print(f"{subdomain} returned HTTP 403, indicating possible misconfiguration.")
 
         if vulnerability_reason:
             return {subdomain: vulnerability_reason}
@@ -85,14 +85,7 @@ def cname_check(entry):
         vulnerability_reason = check_http_response_and_content(subdomain, service_fingerprints, error_patterns)
         if vulnerability_reason:
             vulnerable_subdomains.update(vulnerability_reason)
-            print(f"Vulnerability confirmed for {subdomain}: {vulnerability_reason}")
-        else:
-            print(f"No vulnerabilities found for {subdomain}.")
+        #   print(f"Vulnerability confirmed for {subdomain}: {vulnerability_reason}")
+        # else:
+        #     print(f"No vulnerabilities found for {subdomain}.")
     return vulnerable_subdomains
-
-
-# Load data from files
-
-
-vulnerable_subdomains = cname_check([{'name': 'www.bucrib.com', 'type': 'subdomain'}, {'name': 'blog.bucrib.com', 'type': 'subdomain'}, {'name': 'forms.bucrib.com', 'type': 'subdomain'}])
-print("Vulnerable subdomains:", vulnerable_subdomains)
