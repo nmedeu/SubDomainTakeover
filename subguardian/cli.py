@@ -395,7 +395,7 @@ def main():
     # Check if the 'output' directory exists, if not, create it
     if not os.path.exists(output_directory):
         os.makedirs(output_directory)
-    output_text_file_path = f'{output_directory}/vulnerability_report.txt'
+    vulnerability_report_log = f'{output_directory}/vulnerability_report.txt'
 
     # Function to format the dictionary into a string
     def format_dict_to_string(title, dictionary):
@@ -408,20 +408,60 @@ def main():
         return result
 
     # Open the file and write the formatted string to it
-    with open(output_text_file_path, 'w') as file:
-        file.write(format_dict_to_string('CNAME Vulnerabilities', cname_vulnerabilities))
-        file.write(format_dict_to_string('A Records Vulnerabilities', a_vulnerabilities))
-        file.write(format_dict_to_string('NS Records Vulnerabilities', ns_vulnerabilities))
-        file.write(format_dict_to_string('MX Records Vulnerabilities', mx_vulnerabilities))
-        file.write(format_dict_to_string('TXT Records Vulnerabilities', txt_vulnerabilities))
+    with open(vulnerability_report_log, 'w') as file:
+        if (cname_vulnerabilities == {}):
+            file.write("CNAME Vulnerabilities: N/A\n")
+            file.write("\n")
+        else:
+            file.write(format_dict_to_string('CNAME Vulnerabilities', cname_vulnerabilities))
+        if (a_vulnerabilities == {}):
+            file.write("A Records Vulnerabilities: N/A\n")
+            file.write("\n")
+        else:
+            file.write(format_dict_to_string('A Records Vulnerabilities', a_vulnerabilities))
+        if (ns_vulnerabilities == {}):
+            file.write("NS Records Vulnerabilities: N/A\n")
+            file.write("\n")
+        else:
+            file.write(format_dict_to_string('NS Records Vulnerabilities', ns_vulnerabilities))
+        if (mx_vulnerabilities == {}):
+            file.write("MX Records Vulnerabilities: N/A\n")
+            file.write("\n")
+        else:
+            file.write(format_dict_to_string('MX Records Vulnerabilities', mx_vulnerabilities))
+        if (txt_vulnerabilities == {}):
+            file.write("TXT Records Vulnerabilities: N/A\n")
+            file.write("\n")
+        else:
+            file.write(format_dict_to_string('TXT Records Vulnerabilities', txt_vulnerabilities))
 
 
     # Delete vulnerable records if possible
-    # vulnerable_subdomains = []
-    # if host_types:
-    #     for host in host_types:
-    #         if host == 'cloudfare':
-    #             cloudfare_prevention(vulnerable_subdomains)
+    deleted_subdomain = {}
+    failed_subdomain = {}
+    vulnerable_subdomains = []
+    if host_types:
+        for host in host_types:
+            if host == 'cloudfare':
+                deleted_subdomain, failed_subdomain = cloudfare_prevention(vulnerable_subdomains)
 
-    # Output Results
+    # Save the deleted DNS records in a text file
+    deletion_report_log = f'{output_directory}/deletion_report.txt'
+
+    print(deleted_subdomain)
+    print(failed_subdomain)
+
+    # Open the file and write the formatted string to it
+    with open(deletion_report_log, 'w') as file:
+        if (deleted_subdomain == {}):
+            file.write('Successfully deleted DNS records: N/A\n')
+            file.write("\n")
+        else:
+            file.write(format_dict_to_string('Successfully deleted DNS records', deleted_subdomain))
+        if (failed_subdomain == {}):
+            file.write("Unsuccessfully deleted DNS records: N/A\n")
+            file.write("\n")
+        else:
+            file.write(format_dict_to_string('Unsuccessfully deleted DNS records', failed_subdomain))
+
 
