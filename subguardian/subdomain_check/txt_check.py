@@ -1,9 +1,5 @@
-import dns.resolver
 import re
 import json
-import logging
-
-logging.basicConfig(level=logging.INFO, format='%(asctime)s - %(levelname)s - %(message)s')
 
 
 def load_txt_patterns():
@@ -30,21 +26,15 @@ def txt_check(txt_records):
     
     for record in txt_records:
         for service, patterns in txt_patterns.items():
-            print("SERVICE IS " + service)
-            print("PATTERNS ARE " + str(patterns))  # Ensure patterns is converted to string
             
             for pattern in patterns:
-                print("PATTERN IS " + pattern)
-                print("THE RECORD[strings] IS " + record['strings'])  # This is fine if record['strings'] is always a string
+            
                 if re.search(pattern.replace('.', r'\.').replace('*', r'.*'), record['strings']):
-                    print("SOME PATTERN MATCH")
                     reason = f"Matched {service} pattern '{pattern}' indicating possible vulnerability."
                     if record['name'] in vulnerabilities:
                         vulnerabilities[record['name']].append(reason)
                     else:
                         vulnerabilities[record['name']] = [reason]
-                    logging.warning(f"[VULNERABLE] {record['name']} might be vulnerable due to TXT record: {record}")
+
     return vulnerabilities
 
-print("Vulnerable result for txt here")
-print(txt_check([{'domain': 'bucrib.com', 'name': '_dmarc.bucrib.com', 'strings': 'v=DMARC1; p=none', 'type': 'TXT'}, {'domain': 'bucrib.com', 'name': 'bucrib.com', 'strings': 'v=spf1 include:_spf.mail.hostinger.com ~all', 'type': 'TXT'}]))

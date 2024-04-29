@@ -20,7 +20,7 @@ from .subdomain_check.a_check import a_check
 from .subdomain_check.mx_check import mx_check
 from .subdomain_check.ns_check import ns_check
 from .subdomain_check.txt_check import txt_check
-from .prevention.cloudfare import cloudfare_prevention
+from .prevention.cloudfare import *
 
 
 
@@ -332,6 +332,16 @@ def main():
     records = unique_records(records)
     records = add_sublist3r_if_cname_absent(records, subdomains)
 
+    # If user provided API keys for their DNS, then also use that information
+    if host_types:
+        for host in host_types:
+            if host == 'cloudfare':
+                cloudfare_records = fetch_all_dns_records()
+                
+
+
+
+
 
     # Check for vulnerable CNAME records
     cnames = []
@@ -369,21 +379,17 @@ def main():
     print()
     print()
 
-    print(records['A'])
+    print(records)
     print()
     print(subdomains)
 
-    print("TXT RECORDS START HERE")
-    print("/n")
-    print(records['TXT'])
-
 
     # Delete vulnerable records if possible
-    vulnerable_subdomains = []
-    if host_types:
-        for host in host_types:
-            if host == 'cloudfare':
-                cloudfare_prevention(vulnerable_subdomains)
+    # vulnerable_subdomains = []
+    # if host_types:
+    #     for host in host_types:
+    #         if host == 'cloudfare':
+    #             cloudfare_prevention(vulnerable_subdomains)
 
     # Output Results
 

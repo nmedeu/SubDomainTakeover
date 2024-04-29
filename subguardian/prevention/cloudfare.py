@@ -63,3 +63,4 @@ def cloudfare_prevention(subdomains):
         else:
             logging.error(f"Failed to delete DNS record for {subdomain}: {delete_response.text}")
 
+
