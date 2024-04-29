@@ -69,4 +69,8 @@ def cloudfare_prevention(subdomains):
     
     return deleted_subdomain, failed_subdomain
 
+# records = fetch_all_dns_records()
 
+# for record in records:
+
+#     print(record)

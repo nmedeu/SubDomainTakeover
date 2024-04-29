@@ -38,7 +38,10 @@ def check_http_response_and_content(subdomain, service_fingerprints, error_patte
 
         # Fetch the content of the page
         page_content = response.text.lower()
-        answers = dns.resolver.resolve(subdomain, 'CNAME')
+        try:
+            answers = dns.resolver.resolve(subdomain, 'CNAME')
+        except Exception as e:
+            return None
         for rdata in answers:
             cname = str(rdata.target)
             
@@ -54,9 +57,10 @@ def check_http_response_and_content(subdomain, service_fingerprints, error_patte
                         
 
         # Check for error patterns regardless of service fingerprint
-        for error in error_patterns:
-            if error.lower() in page_content:
-                vulnerability_reason.append(f"Error pattern '{error}' found")
+        
+        # for error in error_patterns:
+        #     if error.lower() in page_content:
+        #         vulnerability_reason.append(f"Error pattern '{error}' found")
 # 
         # Check specific HTTP status codes for general vulnerability indications
         if response.status_code in [404, 410]:
@@ -72,7 +76,7 @@ def check_http_response_and_content(subdomain, service_fingerprints, error_patte
         else:
             return None
     except requests.RequestException as e:
-        print(f"Failed to fetch webpage for {subdomain}: {e}")
+        pass
     
 
 def cname_check(entry):

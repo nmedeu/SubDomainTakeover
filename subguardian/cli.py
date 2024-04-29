@@ -332,16 +332,23 @@ def main():
     records = unique_records(records)
     records = add_sublist3r_if_cname_absent(records, subdomains)
 
-    # If user provided API keys for their DNS, then also use that information
-    if host_types:
-        for host in host_types:
-            if host == 'cloudfare':
-                cloudfare_records = fetch_all_dns_records()
-                
+
+
+    cnames = []
+    # # If user provided API keys for their DNS, then also use that information
+    # if host_types:
+    #     for host in host_types:
+    #         if host == 'cloudfare':
+    #             cloudfare_records = fetch_all_dns_records()
+    #             for record in cloudfare_records:
+    #                 if record['type'] in records:
+    #                     print()
+    #                     records[record['type']].append(record)
+    #                 else:
+    #                     records[record['type']] = record
 
 
     # Check for vulnerable CNAME records
-    cnames = []
     if 'cname' in records:
         cnames.extend(records['cname'])
     if 'sublist3r' in records:
@@ -384,9 +391,9 @@ def main():
     print()
     print()
 
-    print(records)
-    print()
-    print(subdomains)
+    # print(records)
+    # print()
+    # print(subdomains)
 
     # Save the vulnerabilities in a text file
     current_directory = os.getcwd()
@@ -435,7 +442,6 @@ def main():
         else:
             file.write(format_dict_to_string('TXT Records Vulnerabilities', txt_vulnerabilities))
 
-
     # Initialize an empty set to hold unique keys
     vulnerable_subdomains_set = set()
 
@@ -443,16 +449,16 @@ def main():
     vulnerable_subdomains_set.update(cname_vulnerabilities.keys())
     vulnerable_subdomains_set.update(a_vulnerabilities.keys())
     # vulnerable_subdomains_set.update(ns_vulnerabilities.keys())
-    # vulnerable_subdomains_set.update(mx_vulnerabilities.keys())
+    vulnerable_subdomains_set.update(mx_vulnerabilities.keys())
     vulnerable_subdomains_set.update(txt_vulnerabilities.keys())
 
     # Convert the set to a list
     vulnerable_subdomains = list(vulnerable_subdomains_set)
-    print("vulnerable_subdomains: ", vulnerable_subdomains)
 
     # Delete vulnerable records if possible
     deleted_subdomain = {}
     failed_subdomain = {}
+    # vulnerable_subdomains = []
     if host_types:
         for host in host_types:
             if host == 'cloudfare':
@@ -460,9 +466,6 @@ def main():
 
     # Save the deleted DNS records in a text file
     deletion_report_log = f'{output_directory}/deletion_report.txt'
-
-    print(deleted_subdomain)
-    print(failed_subdomain)
 
     # Open the file and write the formatted string to it
     with open(deletion_report_log, 'w') as file:
@@ -476,5 +479,7 @@ def main():
             file.write("\n")
         else:
             file.write(format_dict_to_string('Unsuccessfully deleted DNS records', failed_subdomain))
+
+    print("Done.")
 
 
