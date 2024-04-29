@@ -436,10 +436,23 @@ def main():
             file.write(format_dict_to_string('TXT Records Vulnerabilities', txt_vulnerabilities))
 
 
+    # Initialize an empty set to hold unique keys
+    vulnerable_subdomains_set = set()
+
+    # Combine all dictionaries' keys into the set
+    vulnerable_subdomains_set.update(cname_vulnerabilities.keys())
+    vulnerable_subdomains_set.update(a_vulnerabilities.keys())
+    # vulnerable_subdomains_set.update(ns_vulnerabilities.keys())
+    # vulnerable_subdomains_set.update(mx_vulnerabilities.keys())
+    vulnerable_subdomains_set.update(txt_vulnerabilities.keys())
+
+    # Convert the set to a list
+    vulnerable_subdomains = list(vulnerable_subdomains_set)
+    print("vulnerable_subdomains: ", vulnerable_subdomains)
+
     # Delete vulnerable records if possible
     deleted_subdomain = {}
     failed_subdomain = {}
-    vulnerable_subdomains = []
     if host_types:
         for host in host_types:
             if host == 'cloudfare':
