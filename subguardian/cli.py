@@ -340,9 +340,6 @@ def main():
                 
 
 
-
-
-
     # Check for vulnerable CNAME records
     cnames = []
     if 'cname' in records:
@@ -353,16 +350,24 @@ def main():
     cname_vulnerabilities = cname_check(cnames)
     
     # Check for vulnerable A records
-    a_vulnerabilities = a_check(records['A'])
+    a_vulnerabilities = {}
+    if 'A' in records:
+        a_vulnerabilities = a_check(records['A'])
 
     # Check for vulnerable NS records
-    ns_vulnerabilities = ns_check(records['NS'])
+    ns_vulnerabilities = {}
+    if 'NS' in records:
+        ns_vulnerabilities = ns_check(records['NS'])
 
     # Check for vulnerable MX records
-    mx_vulnerabilities = mx_check(records['MX'])
+    mx_vulnerabilities = {}
+    if 'MX' in records:
+        mx_vulnerabilities = mx_check(records['MX'])
 
     # Check for vulnerable TXT records
-    txt_vulnerabilities = txt_check(records['TXT'])
+    txt_vulnerabilities = {}
+    if 'TXT' in records:
+        txt_vulnerabilities = txt_check(records['TXT'])
 
 
     
@@ -382,6 +387,33 @@ def main():
     print(records)
     print()
     print(subdomains)
+
+    # Save the vulnerabilities in a text file
+    current_directory = os.getcwd()
+    output_directory = os.path.join(current_directory, 'output')
+
+    # Check if the 'output' directory exists, if not, create it
+    if not os.path.exists(output_directory):
+        os.makedirs(output_directory)
+    output_text_file_path = f'{output_directory}/vulnerability_report.txt'
+
+    # Function to format the dictionary into a string
+    def format_dict_to_string(title, dictionary):
+        result = f"{title}:\n"
+        for key, values in dictionary.items():
+            result += f"{key}:\n"
+            for value in values:
+                result += f"  - {value}\n"
+        result += "\n"
+        return result
+
+    # Open the file and write the formatted string to it
+    with open(output_text_file_path, 'w') as file:
+        file.write(format_dict_to_string('CNAME Vulnerabilities', cname_vulnerabilities))
+        file.write(format_dict_to_string('A Records Vulnerabilities', a_vulnerabilities))
+        file.write(format_dict_to_string('NS Records Vulnerabilities', ns_vulnerabilities))
+        file.write(format_dict_to_string('MX Records Vulnerabilities', mx_vulnerabilities))
+        file.write(format_dict_to_string('TXT Records Vulnerabilities', txt_vulnerabilities))
 
 
     # Delete vulnerable records if possible
