@@ -46,5 +46,3 @@ def txt_check(txt_records):
                     logging.warning(f"[VULNERABLE] {record['name']} might be vulnerable due to TXT record: {record}")
     return vulnerabilities
 
-print("Vulnerable result for txt here")
-print(txt_check([{'domain': 'bucrib.com', 'name': '_dmarc.bucrib.com', 'strings': 'v=DMARC1; p=none', 'type': 'TXT'}, {'domain': 'bucrib.com', 'name': 'bucrib.com', 'strings': 'v=spf1 include:_spf.mail.hostinger.com ~all', 'type': 'TXT'}]))
