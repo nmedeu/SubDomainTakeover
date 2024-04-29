@@ -53,8 +53,8 @@ def cloudfare_prevention(subdomains):
     """
     Delete DNS record for the subdomain using Cloudflare API.
     """
-    deleted_subdomain = {}
-    failed_subdomain = {}
+    deleted_subdomain = []
+    failed_subdomain = []
     for subdomain in subdomains:
         record_id = find_id(subdomain)
         # Delete the DNS recrod

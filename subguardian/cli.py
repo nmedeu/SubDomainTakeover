@@ -456,9 +456,8 @@ def main():
     vulnerable_subdomains = list(vulnerable_subdomains_set)
 
     # Delete vulnerable records if possible
-    deleted_subdomain = {}
-    failed_subdomain = {}
-    # vulnerable_subdomains = []
+    deleted_subdomain = []
+    failed_subdomain = []
     if host_types:
         for host in host_types:
             if host == 'cloudfare':
@@ -467,18 +466,26 @@ def main():
     # Save the deleted DNS records in a text file
     deletion_report_log = f'{output_directory}/deletion_report.txt'
 
+    # Function to write a list to a file
+    def write_list_to_file(file, title, lst):
+        file.write(f"{title}:\n")
+        for item in lst:
+            file.write(f"  - {item}\n")
+
     # Open the file and write the formatted string to it
     with open(deletion_report_log, 'w') as file:
-        if (deleted_subdomain == {}):
+        if (deleted_subdomain == []):
             file.write('Successfully deleted DNS records: N/A\n')
             file.write("\n")
         else:
-            file.write(format_dict_to_string('Successfully deleted DNS records', deleted_subdomain))
-        if (failed_subdomain == {}):
+            write_list_to_file(file, 'Successfully deleted DNS records', deleted_subdomain)
+            # file.write(format_dict_to_string('Successfully deleted DNS records', deleted_subdomain))
+        if (failed_subdomain == []):
             file.write("Unsuccessfully deleted DNS records: N/A\n")
             file.write("\n")
         else:
-            file.write(format_dict_to_string('Unsuccessfully deleted DNS records', failed_subdomain))
+            write_list_to_file(file, 'Unsuccessfully deleted DNS records', failed_subdomain)
+            # file.write(format_dict_to_string('Unsuccessfully deleted DNS records', failed_subdomain))
 
     print("Done.")
 
