@@ -391,9 +391,9 @@ def main():
     print()
     print()
 
-    print(records)
-    print()
-    print(subdomains)
+    # print(records)
+    # print()
+    # print(subdomains)
 
     # Save the vulnerabilities in a text file
     current_directory = os.getcwd()
@@ -455,9 +455,6 @@ def main():
     # Save the deleted DNS records in a text file
     deletion_report_log = f'{output_directory}/deletion_report.txt'
 
-    print(deleted_subdomain)
-    print(failed_subdomain)
-
     # Open the file and write the formatted string to it
     with open(deletion_report_log, 'w') as file:
         if (deleted_subdomain == {}):
@@ -470,5 +467,7 @@ def main():
             file.write("\n")
         else:
             file.write(format_dict_to_string('Unsuccessfully deleted DNS records', failed_subdomain))
+
+    print("Done.")
 
 
