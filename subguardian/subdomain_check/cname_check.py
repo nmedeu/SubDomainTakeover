@@ -38,7 +38,10 @@ def check_http_response_and_content(subdomain, service_fingerprints, error_patte
 
         # Fetch the content of the page
         page_content = response.text.lower()
-        answers = dns.resolver.resolve(subdomain, 'CNAME')
+        try:
+            answers = dns.resolver.resolve(subdomain, 'CNAME')
+        except Exception as e:
+            return None
         for rdata in answers:
             cname = str(rdata.target)
             

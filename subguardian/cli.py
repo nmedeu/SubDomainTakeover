@@ -332,19 +332,23 @@ def main():
     records = unique_records(records)
     records = add_sublist3r_if_cname_absent(records, subdomains)
 
-    # If user provided API keys for their DNS, then also use that information
-    if host_types:
-        for host in host_types:
-            if host == 'cloudfare':
-                cloudfare_records = fetch_all_dns_records()
-                
 
 
-
+    cnames = []
+    # # If user provided API keys for their DNS, then also use that information
+    # if host_types:
+    #     for host in host_types:
+    #         if host == 'cloudfare':
+    #             cloudfare_records = fetch_all_dns_records()
+    #             for record in cloudfare_records:
+    #                 if record['type'] in records:
+    #                     print()
+    #                     records[record['type']].append(record)
+    #                 else:
+    #                     records[record['type']] = record
 
 
     # Check for vulnerable CNAME records
-    cnames = []
     if 'cname' in records:
         cnames.extend(records['cname'])
     if 'sublist3r' in records:
