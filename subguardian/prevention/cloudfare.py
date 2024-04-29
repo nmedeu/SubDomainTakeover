@@ -1,6 +1,6 @@
 import requests
 import logging
-import dns.resolver
+# import dns.resolver
 import os
 from dotenv import load_dotenv
 
@@ -53,6 +53,8 @@ def cloudfare_prevention(subdomains):
     """
     Delete DNS record for the subdomain using Cloudflare API.
     """
+    deleted_subdomain = {}
+    failed_subdomain = {}
     for subdomain in subdomains:
         record_id = find_id(subdomain)
         # Delete the DNS recrod
@@ -60,7 +62,11 @@ def cloudfare_prevention(subdomains):
         delete_response = requests.delete(delete_url, headers=headers)
         if delete_response.status_code == 200:
             logging.info(f"Successfully deleted DNS record for {subdomain}.")
+            deleted_subdomain.append(subdomain)
         else:
             logging.error(f"Failed to delete DNS record for {subdomain}: {delete_response.text}")
+            failed_subdomain.append(subdomain)
+    
+    return deleted_subdomain, failed_subdomain
 
 
